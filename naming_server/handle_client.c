@@ -105,14 +105,9 @@ void handle_create_request(int client_fd, char* request, char *path) {
     else file_path = path + 7;
     
     StorageServer* ss = NULL;
-    char* last_slash = strrchr(file_path, '/');
+    char* subpath = str_before_last_slash(file_path);
 
-    if (last_slash != NULL) {
-
-        int length = last_slash - file_path;
-        char *subpath = malloc(length+1);
-        strncpy(subpath, file_path, length);
-        subpath[length] = '\0';
+    if (subpath != NULL) {
 
         pthread_mutex_lock(&server_mutex);
         ss = search_path(subpath);
@@ -140,6 +135,8 @@ void handle_create_request(int client_fd, char* request, char *path) {
         return;
 
     }
+
+    // TODO: add path to accessible paths
 
     if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending acknowledgment to client");
 
@@ -175,13 +172,116 @@ void handle_delete_request(int client_fd, char* request, char *path) {
 
     }
 
+    //TODO: remove path from accessible paths
+
     if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending acknowledgment to client");
 
 }
 
-// Function to handle copy requests between SS
+// Function to handle copy requests between storage servers via the naming server
 void handle_copy_request(int client_fd, char *paths) {
-    // Parse paths and facilitate the copying process between storage servers
+
+    //TODO: copy folder, add accessible paths
+
+    char* file_path;
+    if (strncmp(paths, "FILE", 4) == 0) file_path = paths + 5;
+    else file_path = paths + 7;
+
+    // Parse paths to extract source and destination paths
+    char *source_path = strtok(paths, " ");
+    char *destination_path = strtok(NULL, " ");
+
+    if (source_path == NULL || destination_path == NULL) {
+
+        if (send(client_fd, "2", sizeof("2"), 0) < 0) print_error("Error sending status to client");
+        return;
+
+    }
+
+    // Find source and destination storage servers
+    StorageServer *source_ss = NULL;
+    StorageServer *destination_ss = NULL;
+
+    pthread_mutex_lock(&server_mutex);
+
+    source_ss = search_path(source_path);
+    char* destination_subpath = str_before_last_slash(destination_path);
+    if (destination_subpath != NULL) {
+        
+        destination_ss = search_path(destination_subpath);
+        free(destination_subpath);
+
+    }
+
+    pthread_mutex_unlock(&server_mutex);
+
+    if (source_ss == NULL || destination_ss == NULL) {
+        
+        if (send(client_fd, "2", sizeof("2"), 0) < 0) print_error("Error sending status to client");
+        return;
+
+    }
+
+    // Send a read request to the source storage server
+    char read_request[BUFFER_SIZE];
+    snprintf(read_request, BUFFER_SIZE, "READ %s", source_path);
+    send_req_to_ss(source_ss, read_request);
+
+    // Send a create request to the destination storage server
+    char create_request[BUFFER_SIZE];
+    snprintf(create_request, BUFFER_SIZE, "CREATE FILE %s", destination_path);
+    send_req_to_ss(source_ss, create_request);
+
+    // Receive status from the destination storage server
+    int status;
+    if (recv(destination_ss->fd, &status, sizeof(status), 0) < 0) {
+
+        print_error("Error receiving status from destination storage server");
+        return;
+
+    }
+
+    if (status != OK) {
+
+        if (send(client_fd, "3", sizeof("3"), 0) < 0) print_error("Error sending status to client");
+        return;
+
+    }
+
+    // Send a write request to the destination storage server
+    char write_request[BUFFER_SIZE];
+    snprintf(write_request, BUFFER_SIZE, "WRITE %s", destination_path);
+    send_req_to_ss(destination_ss, write_request);
+
+    // Loop to read from the source and write to the destination
+    char data_buffer[BUFFER_SIZE];
+    int bytes_received;
+    while ((bytes_received = recv(source_ss->fd, data_buffer, sizeof(data_buffer), 0)) > 0) {
+
+        // Send the data chunk to the destination
+        if (send(destination_ss->fd, data_buffer, bytes_received, 0) < 0) {
+            print_error("Error sending data to destination storage server");
+            return;
+        }
+
+    }
+
+    if (bytes_received < 0) {
+        print_error("Error receiving data from source storage server");
+        return;
+    }
+
+    // Receive status from the destination storage server
+    if (recv(destination_ss->fd, &status, sizeof(status), 0) < 0) {
+        print_error("Error receiving acknowledgment from destination storage server");
+        return;
+    }
+
+    // Send acknowledgment back to the client
+    if (send(client_fd, &status, sizeof(status), 0) < 0) {
+        print_error("Error sending acknowledgment to client");
+    }
+
 }
 
 // Function to handle listing all accessible paths

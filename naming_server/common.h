@@ -62,5 +62,6 @@ typedef struct {
 } ClientResponse;
 
 void print_error(char* message);
+char* str_before_last_slash(char* str);
 
 #endif

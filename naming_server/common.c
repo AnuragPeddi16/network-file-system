@@ -9,3 +9,21 @@ void print_error(char* message) {
     free(str);
 
 }
+
+char* str_before_last_slash(char* str) {
+
+    char* substring = NULL;
+    char* last = strrchr(str, '/');
+
+    if (last != NULL) {
+
+        int length = last - str;
+        char *substring = malloc(length+1);
+        strncpy(substring, str, length);
+        substring[length] = '\0';
+
+    }
+
+    return substring;
+
+}
