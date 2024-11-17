@@ -13,6 +13,7 @@
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <errno.h>
 
 #define MAX_SERVERS 50
 #define MAX_CLIENTS 50

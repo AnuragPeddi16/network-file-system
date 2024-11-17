@@ -191,7 +191,7 @@ void *accept_client_connections(void *args) {
 
         }
 
-        printf("Accepted client connection from %s\n", inet_ntoa(client_addr.sin_addr));
+        printf("Accepted client connection %d\n", client_fd);
 
         pthread_t client_thread;
         pthread_create(&client_thread, NULL, client_handler, (void*)&client_fd);
