@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define PATH_SIZE 4096
+#define PATH_SIZE 1024
 
 // Structure of a Trie node
 typedef struct TrieNode {
@@ -16,7 +16,7 @@ typedef struct TrieNode {
     bool isFile;
 } TrieNode;
 
-TrieNode *create_node(const char *path_component, bool isFile);
+TrieNode *create_node(char *path_component, bool isFile);
 void insert_path_trie(TrieNode *root, char *path);
 bool search_path_trie(TrieNode *root, char *path);
 void delete_path_trie(TrieNode *root, char *path);

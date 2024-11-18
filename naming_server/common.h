@@ -15,11 +15,12 @@
 #include <netdb.h>
 #include <errno.h>
 
+#include "../macros.h"
 #include "tries.h"
 
 #define MAX_SERVERS 50
 #define MAX_CLIENTS 50
-#define MAX_PATHS_PER_SERVER 500
+#define MAX_PATHS_PER_SERVER 100
 
 #define BUFFER_SIZE 4096
 
@@ -51,5 +52,7 @@ typedef struct {
 
 void print_error(char* message);
 char* str_before_last_slash(char* str);
+char** tokenize(char* string, char* delimiters);
+void completeFree(char** arr);
 
 #endif

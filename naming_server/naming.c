@@ -34,10 +34,17 @@ void get_local_ipv4_address(char *ip_buffer, size_t buffer_size) {
 
 void tokenise_and_store(TrieNode* root, char* paths) {
 
-    char* path;
-    path = strtok(paths, ",");
+    char** path_tokens = tokenize(paths, ",");
 
-    while (path != NULL) insert_path_trie(root, path);
+    int i = 0;
+    while (path_tokens[i] != NULL) {
+        
+        insert_path_trie(root, path_tokens[i]);
+        i++;
+
+    }
+
+    completeFree(path_tokens);
 
 }
 
@@ -128,8 +135,8 @@ void *accept_ss_connections(void *args) {
         printf("Received server connection...\n");
 
         // Receive data from the storage server
-        char buffer[BUFFER_SIZE] = {0};
-        int bytes_received = recv(ss_fd, buffer, BUFFER_SIZE - 1, 0);
+        char buffer[PATH_SIZE*MAX_PATHS_PER_SERVER] = {0};
+        int bytes_received = recv(ss_fd, buffer, PATH_SIZE*MAX_PATHS_PER_SERVER - 1, 0);
         if (bytes_received < 0) {
             print_error("Error receiving data");
             close(ss_fd);
@@ -140,7 +147,7 @@ void *accept_ss_connections(void *args) {
 
         // Parse the received data (format: "REGISTER|<PORT_NUMBER>:<PATH1>,<PATH2>,<PATH3>...")
         int client_port;
-        char paths[BUFFER_SIZE] = {0};
+        char paths[PATH_SIZE*MAX_PATHS_PER_SERVER] = {0};
         sscanf(buffer+9, "%d:%[^\n]", &client_port, paths);
 
         add_storage_server(ss_fd, inet_ntoa(ss_addr.sin_addr), ntohs(ss_addr.sin_port), client_port, paths);
