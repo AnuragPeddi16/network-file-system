@@ -100,7 +100,7 @@ void *accept_ss_connections(void *args) {
     struct sockaddr_in ss_addr;
     socklen_t ss_addr_len = sizeof(ss_addr);
 
-    printf(YELLOW("Thread started:") " Waiting for incoming storage server connections...\n\n");
+    printf(GREEN("Thread started:") " Waiting for incoming storage server connections...\n\n");
 
     while (1) {
 
@@ -179,7 +179,7 @@ void *accept_client_connections(void *args) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
 
-    printf(YELLOW("Thread started:") " Waiting for incoming client connections...\n\n");
+    printf(GREEN("Thread started:") " Waiting for incoming client connections...\n\n");
 
     while (1) {
 
@@ -191,12 +191,11 @@ void *accept_client_connections(void *args) {
 
         }
 
-        printf("Accepted client connection from %s\n", inet_ntoa(client_addr.sin_addr));
+        printf("Accepted client connection %d\n", client_fd);
 
         pthread_t client_thread;
         pthread_create(&client_thread, NULL, client_handler, (void*)&client_fd);
-
-        pthread_join(client_thread, NULL);
+        pthread_detach(client_thread);
         
     }
 
