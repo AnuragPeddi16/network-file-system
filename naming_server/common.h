@@ -21,7 +21,6 @@
 #define MAX_CLIENTS 50
 #define MAX_PATHS_PER_SERVER 500
 
-#define PATH_SIZE 4096
 #define BUFFER_SIZE 4096
 
 #define SS_PORT 8050
@@ -48,7 +47,8 @@ typedef struct {
     char ip[INET_ADDRSTRLEN];
     int nm_port;
     int client_port;
-    char accessible_paths[PATH_SIZE*MAX_PATHS_PER_SERVER]; // comma separated
+    //char accessible_paths[PATH_SIZE*MAX_PATHS_PER_SERVER]; // comma separated
+    TrieNode* paths_root;
 } StorageServer;
 
 extern StorageServer storage_servers[MAX_SERVERS];

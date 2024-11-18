@@ -68,11 +68,11 @@ void move_to_head(node *n) {
 }
 
 // Function to search for a path in the storage servers
-StorageServer* search_path(const char *path) {    
+StorageServer* search_path(char *path) {    
 
     pthread_mutex_lock(&server_mutex);
     for (int i = 0; i < server_count; i++) {
-        if (strstr(storage_servers[i].accessible_paths, path) != NULL) {
+        if (search_path_trie(storage_servers[i].paths_root, path)) {
             pthread_mutex_unlock(&server_mutex);
             return &storage_servers[i];
         }

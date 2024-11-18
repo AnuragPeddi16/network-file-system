@@ -32,8 +32,17 @@ void get_local_ipv4_address(char *ip_buffer, size_t buffer_size) {
     freeifaddrs(ifaddr);
 }
 
+void tokenise_and_store(TrieNode* root, char* paths) {
+
+    char* path;
+    path = strtok(paths, ",");
+
+    while (path != NULL) insert_path_trie(root, path);
+
+}
+
 // Function to add a storage server
-bool add_storage_server(int fd, const char *ip, int nm_port, int client_port, const char *paths) {
+bool add_storage_server(int fd, const char *ip, int nm_port, int client_port, char *paths) {
 
     pthread_mutex_lock(&server_mutex);
 
@@ -49,7 +58,10 @@ bool add_storage_server(int fd, const char *ip, int nm_port, int client_port, co
     strncpy(storage_servers[server_count].ip, ip, INET_ADDRSTRLEN);
     storage_servers[server_count].nm_port = nm_port;
     storage_servers[server_count].client_port = client_port;
-    strncpy(storage_servers[server_count].accessible_paths, paths, PATH_SIZE);
+
+    storage_servers[server_count].paths_root = create_node("root", false);
+    tokenise_and_store(storage_servers[server_count].paths_root, paths);
+
     server_count++;
     printf("Storage server added: IP %s, Port %d\n", ip, nm_port);
 
@@ -126,10 +138,10 @@ void *accept_ss_connections(void *args) {
 
         buffer[bytes_received] = '\0'; // Null-terminate the received string
 
-        // Parse the received data (format: "<PORT_NUMBER>:<PATH1>,<PATH2>,<PATH3>...")
+        // Parse the received data (format: "REGISTER|<PORT_NUMBER>:<PATH1>,<PATH2>,<PATH3>...")
         int client_port;
         char paths[BUFFER_SIZE] = {0};
-        sscanf(buffer, "%d:%[^\n]", &client_port, paths);
+        sscanf(buffer+9, "%d:%[^\n]", &client_port, paths);
 
         add_storage_server(ss_fd, inet_ntoa(ss_addr.sin_addr), ntohs(ss_addr.sin_port), client_port, paths);
         

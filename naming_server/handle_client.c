@@ -116,7 +116,7 @@ void handle_create_request(int client_fd, char* request, char *path) {
 
     }
 
-    // TODO: add path to accessible paths
+    insert_path_trie(ss->paths_root, file_path);
 
     if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending acknowledgment to client");
 
@@ -150,7 +150,7 @@ void handle_delete_request(int client_fd, char* request, char *path) {
 
     }
 
-    //TODO: remove path from accessible paths
+    delete_path_trie(ss->paths_root, file_path);
 
     if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending acknowledgment to client");
 
@@ -267,15 +267,28 @@ void handle_list_request(int client_fd) {
 
         StorageServer* ss = &storage_servers[i];
         
-        char buffer[PATH_SIZE*MAX_PATHS_PER_SERVER];
-        strcpy(buffer, ss->accessible_paths);
-        
-        if (send(client_fd, buffer, strlen(buffer), 0) < 0) {
+        int count;
+        char buffer[MAX_PATHS_PER_SERVER][PATH_SIZE];
+        store_all_paths_trie(ss->paths_root, buffer, &count);
 
-            print_error("Error sending accessible paths to client");
-            break;
+        bool error = false;
+
+        for (int i = 0; i < count; i++) {
+
+            char* path = buffer[i];
+            strcat(path, "\n");
+        
+            if (send(client_fd, path, strlen(path), 0) < 0) {
+
+                print_error("Error sending accessible paths to client");
+                error = true;
+                break;
+
+            }
 
         }
+
+        if (error) break;
 
     }
 

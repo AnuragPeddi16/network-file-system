@@ -1,4 +1,4 @@
-common_files = common
+common_files = tries common
 naming_server_files = handle_client lru
 
 common_files_h = $(foreach C,$(common_files),$C.h)
