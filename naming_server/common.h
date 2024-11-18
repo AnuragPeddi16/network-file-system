@@ -15,6 +15,8 @@
 #include <netdb.h>
 #include <errno.h>
 
+#include "tries.h"
+
 #define MAX_SERVERS 50
 #define MAX_CLIENTS 50
 #define MAX_PATHS_PER_SERVER 500
