@@ -15,7 +15,7 @@ node *tail = NULL; // Tail of the linked list
 void cache_init() {
     head = malloc(sizeof(node));
     if (!head) {
-        perror("Failed to allocate memory for cache");
+        print_error("Failed to allocate memory for cache");
         exit(EXIT_FAILURE);
     }
 
@@ -29,7 +29,7 @@ void cache_init() {
     for (int i = 1; i < CACHE_SIZE; i++) {
         temp->next = malloc(sizeof(node));
         if (!temp->next) {
-            perror("Failed to allocate memory for cache node");
+            print_error("Failed to allocate memory for cache node");
             exit(EXIT_FAILURE);
         }
 
@@ -67,8 +67,25 @@ void move_to_head(node *n) {
     head = n; // Update head pointer
 }
 
-// Function to insert a path into the cache
-StorageServer* cache_insert(char *path) {
+// Function to search for a path in the storage servers
+StorageServer* search_path(const char *path) {    
+
+    pthread_mutex_lock(&server_mutex);
+    for (int i = 0; i < server_count; i++) {
+        if (strstr(storage_servers[i].accessible_paths, path) != NULL) {
+            pthread_mutex_unlock(&server_mutex);
+            return &storage_servers[i];
+        }
+    }
+
+    pthread_mutex_unlock(&server_mutex);
+    return NULL;
+}
+
+StorageServer* cache_search(char *path);
+
+// Function to search for a path and insert if missing
+StorageServer* cache_search_insert(char *path) {
     // Check if the path is already in the cache
     StorageServer *ss = cache_search(path);
     if (ss != NULL) {
@@ -76,7 +93,7 @@ StorageServer* cache_insert(char *path) {
     }
 
     // Translate the path to a StorageServer *
-    ss = translation(path); //-------------------------------defined by anurag----------------------------------
+    ss = search_path(path);
 
     // Add to the head of the cache
     node *new_node = tail; // Reuse the least recently used node

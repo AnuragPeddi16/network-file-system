@@ -1,20 +1,6 @@
 #include "handle_client.h"
 
-// Function to search for a path in the storage servers
-// server lock should be held
-StorageServer* search_path(const char *path) {    
-
-    for (int i = 0; i < server_count; i++) {
-        if (strstr(storage_servers[i].accessible_paths, path) != NULL) {
-            return &storage_servers[i];
-        }
-    }
-
-    return NULL;
-}
-
 // NULL ss means path not found
-// Server lock must be held if ss is not NULL
 void send_ss_to_client(StorageServer* ss, int client_fd) {
 
     ClientResponse* response = (ClientResponse*) malloc(sizeof(ClientResponse)); 
@@ -22,9 +8,11 @@ void send_ss_to_client(StorageServer* ss, int client_fd) {
 
     if (ss) {
 
+        pthread_mutex_lock(&server_mutex);
         response->status = OK;
         strcpy(response->server_ip, ss->ip);
         response->server_port = ss->client_port;
+        pthread_mutex_unlock(&server_mutex);
 
     }
 
@@ -44,7 +32,9 @@ void send_ss_to_client(StorageServer* ss, int client_fd) {
 
 void send_req_to_ss(StorageServer* ss, char* request) {
 
+    pthread_mutex_lock(&server_mutex);
     int ss_fd = ss->fd;
+    pthread_mutex_unlock(&server_mutex);
 
     if (send(ss_fd, request, strlen(request), 0) < 0) {
 
@@ -60,40 +50,32 @@ void send_req_to_ss(StorageServer* ss, char* request) {
 // Function to handle read requests
 void handle_read_request(int client_fd, char *file_path) {
     
-    pthread_mutex_lock(&server_mutex);
-    StorageServer* ss = search_path(file_path);
+    StorageServer* ss = cache_search_insert(file_path);
     send_ss_to_client(ss, client_fd);
-    pthread_mutex_unlock(&server_mutex);
 
 }
 
 // Function to handle write requests
 void handle_write_request(int client_fd, char *file_path) {
     
-    pthread_mutex_lock(&server_mutex);
-    StorageServer* ss = search_path(file_path);
+    StorageServer* ss = cache_search_insert(file_path);
     send_ss_to_client(ss, client_fd);
-    pthread_mutex_unlock(&server_mutex);
 
 }
 
 // Function to handle file information requests
 void handle_info_request(int client_fd, char *file_path) {
     
-    pthread_mutex_lock(&server_mutex);
-    StorageServer* ss = search_path(file_path);
+    StorageServer* ss = cache_search_insert(file_path);
     send_ss_to_client(ss, client_fd);
-    pthread_mutex_unlock(&server_mutex);
 
 }
 
 // Function to handle audio streaming requests
 void handle_stream_request(int client_fd, char *file_path) {
     
-    pthread_mutex_lock(&server_mutex);
-    StorageServer* ss = search_path(file_path);
+    StorageServer* ss = cache_search_insert(file_path);
     send_ss_to_client(ss, client_fd);
-    pthread_mutex_unlock(&server_mutex);
 
 }
 
@@ -109,9 +91,7 @@ void handle_create_request(int client_fd, char* request, char *path) {
 
     if (subpath != NULL) {
 
-        pthread_mutex_lock(&server_mutex);
-        ss = search_path(subpath);
-        pthread_mutex_unlock(&server_mutex);
+        ss = cache_search_insert(subpath);
 
         free(subpath);
         
@@ -149,9 +129,7 @@ void handle_delete_request(int client_fd, char* request, char *path) {
     if (strncmp(path, "FILE", 4) == 0) file_path = path + 5;
     else file_path = path + 7;
     
-    pthread_mutex_lock(&server_mutex);
-    StorageServer* ss = search_path(file_path);
-    pthread_mutex_unlock(&server_mutex);
+    StorageServer* ss = cache_search_insert(file_path);
 
     if (ss == NULL) {
         
@@ -202,18 +180,14 @@ void handle_copy_request(int client_fd, char *paths) {
     StorageServer *source_ss = NULL;
     StorageServer *destination_ss = NULL;
 
-    pthread_mutex_lock(&server_mutex);
-
-    source_ss = search_path(source_path);
+    source_ss = cache_search_insert(source_path);
     char* destination_subpath = str_before_last_slash(destination_path);
     if (destination_subpath != NULL) {
         
-        destination_ss = search_path(destination_subpath);
+        destination_ss = cache_search_insert(destination_subpath);
         free(destination_subpath);
 
     }
-
-    pthread_mutex_unlock(&server_mutex);
 
     if (source_ss == NULL || destination_ss == NULL) {
         

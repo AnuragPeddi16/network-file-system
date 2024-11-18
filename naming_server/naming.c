@@ -1,5 +1,6 @@
 #include "common.h"
 #include "handle_client.h"
+#include "lru.h"
 
 StorageServer storage_servers[MAX_SERVERS];
 int server_count = 0;
@@ -214,8 +215,13 @@ void start_naming_server() {
 }
 
 int main() {
+
     pthread_mutex_init(&server_mutex, NULL);
+    cache_init();
     start_naming_server();
+    cache_cleanup();
     pthread_mutex_destroy(&server_mutex);
+
     return 0;
+
 }

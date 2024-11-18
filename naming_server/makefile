@@ -1,5 +1,5 @@
 common_files = common
-naming_server_files = handle_client
+naming_server_files = handle_client lru
 
 common_files_h = $(foreach C,$(common_files),$C.h)
 common_files_c = $(foreach C,$(common_files),$C.c)
