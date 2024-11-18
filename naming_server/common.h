@@ -26,20 +26,6 @@
 #define SS_PORT 8050
 #define CLIENT_PORT 8051
 
-#define COLOR_RESET   "\x1b[0m"
-
-#define RED(x)     "\x1b[31m" x "\x1b[0m"
-#define GREEN(x)   "\x1b[32m" x "\x1b[0m"
-#define YELLOW(x)  "\x1b[33m" x "\x1b[0m"
-#define BLUE(x)    "\x1b[34m" x "\x1b[0m"
-#define MAGENTA(x) "\x1b[35m" x "\x1b[0m"
-#define CYAN(x)    "\x1b[36m" x "\x1b[0m"
-
-/* STATUS CODES */
-#define OK 0
-#define ACK 1
-#define NOT_FOUND 2
-#define FAILED 3
 
 // Structure to store metadata about storage servers
 typedef struct {
