@@ -22,6 +22,8 @@
 #define MAX_ACCESSIBLE_PATHS 100
 #define MAX_PATH_LENGTH 1024
 #define MAX_CLIENTS 100
+#define NM_PORT 8080
+#define MAX_CONCURRENT_FILES 100
 
 // Storage Server Configuration Structure
 typedef struct {
@@ -33,13 +35,25 @@ typedef struct {
     int num_paths;
 } StorageServerConfig;
 
+// Structure to manage file locks
+typedef struct {
+    char filename[MAX_PATH_LENGTH];
+    pthread_mutex_t mutex;
+    int ref_count;
+} FileLock;
+
 // Global configuration variable
 extern StorageServerConfig config;
+
+// Global array to track file locks
+FileLock file_locks[MAX_CONCURRENT_FILES];
+pthread_mutex_t file_locks_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Function declarations
 char* trim_whitespace(char* str);
 void parse_paths(char* paths_arg);
 void log_message(const char* message);
 int find_free_port();
+char* get_storage_server_ip();
 
 #endif // UTILS_H

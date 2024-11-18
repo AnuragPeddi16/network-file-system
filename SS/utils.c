@@ -102,3 +102,91 @@ int find_free_port() {
     // }
     // return -1;
 }
+
+// Function to get Storage Server IP (using one of the methods from previous answer)
+char* get_storage_server_ip() {
+    int new_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (new_sock < 0) {
+        perror("socket");
+        return NULL;
+    }
+
+    struct sockaddr_in serv;
+    memset(&serv, 0, sizeof(serv));
+    serv.sin_family = AF_INET;
+    serv.sin_addr.s_addr = inet_addr("8.8.8.8");  // Google's DNS server
+    serv.sin_port = htons(53);  // DNS port
+
+    if (connect(new_sock, (struct sockaddr *)&serv, sizeof(serv)) < 0) {
+        perror("connect");
+        close(new_sock);
+        return NULL;
+    }
+
+    struct sockaddr_in name;
+    socklen_t namelen = sizeof(name);
+    char* ip_address = malloc(INET_ADDRSTRLEN);
+    
+    if (getsockname(new_sock, (struct sockaddr *)&name, &namelen) < 0) {
+        perror("getsockname");
+        close(new_sock);
+        free(ip_address);
+        return NULL;
+    }
+
+    inet_ntop(AF_INET, &name.sin_addr, ip_address, INET_ADDRSTRLEN);
+    
+    close(new_sock);
+    return ip_address;
+}
+
+// Initialization function to be called at server startup
+void initialize_file_locks() {
+    for (int i = 0; i < MAX_CONCURRENT_FILES; i++) {
+        file_locks[i].filename[0] = '\0';
+        file_locks[i].ref_count = 0;
+    }
+}
+
+// Function to get or create a lock for a specific file
+FileLock* get_file_lock(const char* filename) {
+    pthread_mutex_lock(&file_locks_mutex);
+    
+    // Try to find existing lock or empty slot
+    for (int i = 0; i < MAX_CONCURRENT_FILES; i++) {
+        if (file_locks[i].filename[0] == '\0' || 
+            strcmp(file_locks[i].filename, filename) == 0) {
+            
+            // Initialize lock if not already done
+            if (file_locks[i].filename[0] == '\0') {
+                strncpy(file_locks[i].filename, filename, MAX_PATH_LENGTH - 1);
+                pthread_mutex_init(&file_locks[i].mutex, NULL);
+                file_locks[i].ref_count = 0;
+            }
+            
+            file_locks[i].ref_count++;
+            pthread_mutex_unlock(&file_locks_mutex);
+            return &file_locks[i];
+        }
+    }
+    
+    pthread_mutex_unlock(&file_locks_mutex);
+    return NULL; // No available locks
+}
+
+// Function to release file lock
+void release_file_lock(FileLock* lock) {
+    if (lock == NULL) return;
+
+    pthread_mutex_lock(&file_locks_mutex);
+    lock->ref_count--;
+
+    // If no more references, reset the lock
+    if (lock->ref_count <= 0) {
+        pthread_mutex_destroy(&lock->mutex);
+        lock->filename[0] = '\0';
+        lock->ref_count = 0;
+    }
+    
+    pthread_mutex_unlock(&file_locks_mutex);
+}

@@ -26,7 +26,7 @@
 #define NOT_FOUND "2"
 #define FAILED "3"
 #define SYNC_THRESHOLD 4096  // 4KB
-#define CHUNK_SIZE 1024      // 1KB chunks for async writing
+#define SEGMENT_SIZE 1024      // 1KB chunks for async writing
 
 //nm_sock
 extern int sock;
@@ -40,8 +40,9 @@ int handle_client_delete_request(const char* path);
 int handle_client_info_request(const char* path, char* info_buffer);
 int handle_client_stream_request(const char* path, int client_socket);
 int handle_client_list_request(int client_socket);
-int copy_file(const char* source_path, const char* dest_path);
-int copy_directory(const char* source_path, const char* dest_path);
-int handle_client_copy_request(char* type, char* source_path, const char* dest_path);
+int zip_path_and_send(const char* source_path);
+int unzip_received_data(const char* destination_path);
+
+
 
 #endif // OPERATIONS_H

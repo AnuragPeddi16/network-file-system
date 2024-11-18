@@ -2,6 +2,7 @@
 #include "operations.h"
 
 extern StorageServerConfig config;
+
 int sock;
 
 // Register with Naming Server
@@ -43,7 +44,7 @@ int main(int argc, char *argv[]) {
 
     // Initialize Configuration
     strcpy(config.nm_ip, argv[1]);
-    config.nm_port = 5050;  // Default NM port
+    config.nm_port = NM_PORT;  // Default NM port
     config.ss_nm_port = find_free_port();
     config.ss_client_port = find_free_port();
 
@@ -53,7 +54,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Parse Accessible Paths, Tiokenise with , and store in config
+    // Parse Accessible Paths, Tokenise with , and store in config
     parse_paths(argv[2]);
 
     // Register with Naming Server
