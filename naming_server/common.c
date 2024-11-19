@@ -19,7 +19,7 @@ char* str_before_last_slash(char* str) {
     if (last != NULL) {
 
         int length = last - str + 1;
-        char *substring = malloc(length+1);
+        substring = malloc(length+1);
         strncpy(substring, str, length);
         substring[length] = '\0';
 

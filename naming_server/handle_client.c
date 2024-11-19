@@ -82,12 +82,21 @@ void handle_stream_request(int client_fd, char *file_path) {
 // Function to handle create requests
 void handle_create_request(int client_fd, char* request, char *path) {
 
-    char* file_path;
-    if (strncmp(path, "FILE", 4) == 0) file_path = path + 5;
-    else file_path = path + 7;
+    char* file_path = (char*) malloc(sizeof(char)*strlen(path));
+    if (strncmp(path, "FILE", 4) == 0) strcpy(file_path, path + 5);
+    else {
+        
+        strcpy(file_path, path + 7);
+        if (file_path[strlen(file_path)-1] == '/') file_path[strlen(file_path)-1] = '\0';
+
+    }
+
+    printf("%s\n", file_path);
     
     StorageServer* ss = NULL;
     char* subpath = str_before_last_slash(file_path);
+
+    printf("%s\n", subpath);
 
     if (subpath != NULL) {
 
@@ -117,6 +126,7 @@ void handle_create_request(int client_fd, char* request, char *path) {
     }
 
     insert_path_trie(ss->paths_root, file_path);
+    free(file_path);
 
     if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending acknowledgment to client");
 

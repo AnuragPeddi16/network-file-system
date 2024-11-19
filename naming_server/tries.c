@@ -99,26 +99,34 @@ void delete_all_children(TrieNode *node) {
     }
 }
 
-// Recursive function to delete a node and its children if needed
-int delete_path_helper(TrieNode *current, char *path, bool isFile) {
-
-    if (*path == '\0' || strcmp(path, "/") == 0) {
-        
-        delete_all_children(current);
-        return 1;
-
-    }
+// Function to delete a path from the Trie
+void delete_path_trie(TrieNode *root, char *path) {
 
     char path_copy[strlen(path) + 1];
     strcpy(path_copy, path);
+
+    if (path_copy[strlen(path_copy)-1] == '/') path_copy[strlen(path_copy)-1] = '\0';
+
     char *token = strtok(path_copy, "/");
 
-    TrieNode *parent = current;
-    TrieNode *child = find_child(current, token);
+    TrieNode *current = root;
+    TrieNode *parent;
 
-    // TODO: revise
+    while (token != NULL) {
+        parent = current;
+        current = find_child(current, token);
+        if (current == NULL) {
+            return; // Path not found
+        }
+        token = strtok(NULL, "/");
+    }
 
-    if (child != NULL && delete_path_helper(child, strtok(NULL, ""), isFile)) {
+    TrieNode *child = current;
+
+    if (child != NULL) {
+
+        delete_all_children(child);
+
         // Remove the child from the parent's list
         if (parent->first_child == child) {
             parent->first_child = child->next_sibling;
@@ -131,19 +139,8 @@ int delete_path_helper(TrieNode *current, char *path, bool isFile) {
         }
         free(child->path_component);
         free(child);
-        return parent->first_child == NULL;
+
     }
-
-    return 0;
-}
-
-// Function to delete a path from the Trie
-void delete_path_trie(TrieNode *root, char *path) {
-
-    bool isFile = true;
-    if (path[strlen(path)-1] = '/') isFile = false;
-
-    delete_path_recursive(root, path, isFile);
 }
 
 // Recursive function to store all paths in a 2D buffer
