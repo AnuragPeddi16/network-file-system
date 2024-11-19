@@ -48,7 +48,7 @@ void tokenise_and_store(TrieNode* root, char* paths) {
 
 }
 
-void add_backups(StorageServer* ss) {
+int add_backups(StorageServer* ss) {
 
     int count = 0;
 
@@ -64,6 +64,8 @@ void add_backups(StorageServer* ss) {
         if (count >= 2) break;
 
     }
+
+    return count;
 
 }
 
@@ -107,7 +109,9 @@ bool add_storage_server(int fd, const char *ip, int nm_port, int client_port, ch
     storage_servers[server_count].paths_root = create_node("root", false);
     tokenise_and_store(storage_servers[server_count].paths_root, paths);
 
-    if (server_count >= 2) add_backups(&storage_servers[server_count]);
+    int count = 0;
+    if (server_count >= 2) count = add_backups(&storage_servers[server_count]);
+    storage_servers[server_count].num_backups = count;
 
     server_count++;
 

@@ -26,7 +26,7 @@
 #define MAX_PATHS_PER_SERVER 100
 
 #define BUFFER_SIZE 4096
-#define MAX_FILE_SIZE 1000000000
+#define MAX_FILE_SIZE 100000
 
 #define SS_PORT 8050
 #define CLIENT_PORT 8051
@@ -41,6 +41,7 @@ typedef struct StorageServer {
     int client_port;
     TrieNode* paths_root;
     struct StorageServer* backups[2];
+    int num_backups;
 } StorageServer;
 
 extern StorageServer storage_servers[MAX_SERVERS];
