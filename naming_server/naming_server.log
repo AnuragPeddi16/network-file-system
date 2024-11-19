@@ -1,12 +1,13 @@
-[20-11-2024 05:10:02] Naming server listening for storage servers on port 8050 at ip 10.1.131.145
+[20-11-2024 05:17:27] Naming server listening for clients on port 8051 at ip 10.1.131.145
 
-[20-11-2024 05:10:02] Naming server listening for clients on port 8051 at ip 10.1.131.145
+[20-11-2024 05:17:27] Naming server listening for storage servers on port 8050 at ip 10.1.131.145
 
-[20-11-2024 05:10:06] Received server connection...
-[20-11-2024 05:10:06] Storage server added: IP 127.0.0.1, Port 52060
+[20-11-2024 05:17:29] Received server connection...
+[20-11-2024 05:17:29] Storage server added: IP 127.0.0.1, Port 40136
 
-[20-11-2024 05:10:12] Accepted client connection 6
-[20-11-2024 05:10:12] Received request from client: COPY FILE a/old.c b/new.c
+[20-11-2024 05:17:54] Accepted client connection 4
+[20-11-2024 05:17:54] Received request from client: WRITE a/try.c (null)
 
-[20-11-2024 05:10:12] Received ack with status 1
+[20-11-2024 05:17:54] Sent response to client 4: IP 127.0.0.1 and port 51951 with status 0
+[20-11-2024 05:17:54] Client connection 4 closed.
 

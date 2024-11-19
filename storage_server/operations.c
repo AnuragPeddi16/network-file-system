@@ -42,7 +42,7 @@ int handle_client_write_request(const char* upath, const char* data) {
     int write_result = 0;
 
     // Choose writing strategy based on data size
-    if (data_size > SYNC_THRESHOLD && sync==0) {
+    if (data_size > ASYNC_LIMIT && sync==0) {
         // Segmented writing for large data
         size_t written = 0;
         while (written < data_size) {
@@ -553,7 +553,7 @@ void* handle_client_request(void* client_socket_ptr) {
             }
 
             //Write data to file
-            if (data_size >= SYNC_THRESHOLD && sync==0) {              // Asynchronous Write
+            if (data_size >= ASYNC_LIMIT && sync==0) {              // Asynchronous Write
                 int ack = htonl(ASYNCHRONOUS_COMPLETE);
                 send(client_sock,&ack,sizeof(ack), 0);
 

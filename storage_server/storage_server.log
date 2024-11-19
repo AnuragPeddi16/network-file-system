@@ -883,3 +883,35 @@ int handle_client_write_request(const char* upath, const char* data) {
 "
 [Wed Nov 20 05:10:12 2024
 ] READ SUCCESS
+[Wed Nov 20 05:12:18 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:12:18 2024
+] SUCCESS:Registration
+[Wed Nov 20 05:12:18 2024
+] SUCCESS: Storage Server running on port Client_port 52123
+[Wed Nov 20 05:13:12 2024
+] WRITE a/try.c usgdeshjkfhgegfjhdsfbjdgjdgbjhbgjb
+[Wed Nov 20 05:13:12 2024
+] Write Request: Path=./a/try.c, Size=34 bytes
+[Wed Nov 20 05:13:12 2024
+] WRITE SUCCESS: Path=./a/try.c, Size=34 bytes
+[Wed Nov 20 05:13:46 2024
+] WRITE a/try.c usgdeshjkfhgegfjhdsfbjdgjdgbjhbgjbldjsgjehgbkfjdhvijsehgjesjkfbvjkg,jshghgierhgkzjhgkjdhfglishglieshglisehlighaliefguhlighilsehgilzeiuhaiufgegkawhgawkdhgilawhilUWEFIUyfiu
+[Wed Nov 20 05:13:46 2024
+] Write Request: Path=./a/try.c, Size=170 bytes
+[Wed Nov 20 05:13:46 2024
+] WRITE SUCCESS: Path=./a/try.c, Size=170 bytes
+[Wed Nov 20 05:17:29 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:17:29 2024
+] SUCCESS:Registration
+[Wed Nov 20 05:17:29 2024
+] SUCCESS: Storage Server running on port Client_port 51951
+[Wed Nov 20 05:17:54 2024
+] WRITE a/try.c jhdsfgjhsfgjsdfgjbfkfhgjsgfjhszkudgukvzjvhgukgvjkgfugskugSKUFdjzsgfusgfdusgdfugfgSUFDKSUGfkuSGFkusgfkuzsgksHsgfSGVuYSDGulyzsgfukvgdufvgKSUFDgusdygfyudsfgyus
+[Wed Nov 20 05:17:54 2024
+] Write Request: Path=./a/try.c, Size=156 bytes
+[Wed Nov 20 05:17:54 2024
+] WRITE SUCCESS: Path=./a/try.c, Size=156 bytes
