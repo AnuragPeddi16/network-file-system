@@ -6,15 +6,17 @@ int sock;
 
 // Global array to track file locks
 FileLock file_locks[MAX_CONCURRENT_FILES];
-pthread_mutex_t file_locks_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t file_locks_mutex;
 
 // Register with Naming Server
 void register_with_naming_server() {
     sock = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in nm_addr;
     nm_addr.sin_family = AF_INET;
+    pthread_mutex_lock(&config.config_mutex);
     nm_addr.sin_port = htons(config.nm_port);
     inet_pton(AF_INET, config.nm_ip, &nm_addr.sin_addr);
+    pthread_mutex_unlock(&config.config_mutex);
 
     if (connect(sock, (struct sockaddr*)&nm_addr, sizeof(nm_addr)) < 0) {
         log_message("Registration connection failed");
@@ -25,13 +27,17 @@ void register_with_naming_server() {
     // Prepare registration message
     char message[BUFFER_SIZE+100];
     char paths_str[BUFFER_SIZE] = "";
+    pthread_mutex_lock(&config.config_mutex);
     for (int i = 0; i < config.num_paths; i++) {
         strcat(paths_str, config.accessible_paths[i]);
         if (i < config.num_paths - 1) strcat(paths_str, ",");
     }
+    pthread_mutex_unlock(&config.config_mutex);
 
     //Format: REGISTER|<SS_PORT>:<PATH1>,<PATH2>,<PATH3>...
+    pthread_mutex_lock(&config.config_mutex);
     snprintf(message, sizeof(message), "REGISTER|%d:%s", config.ss_client_port, paths_str);
+    pthread_mutex_unlock(&config.config_mutex);
     send(sock, message, strlen(message), 0);
     //I can add IP here, if required
 
@@ -59,11 +65,15 @@ int main(int argc, char *argv[]) {
     config.ss_nm_port = find_free_port();
     config.ss_client_port = find_free_port();
 
+    pthread_mutex_init(&config.config_mutex, NULL);
+
+    pthread_mutex_lock(&config.config_mutex);
     //Error Check: Free Port
     if(config.ss_nm_port == -1 || config.ss_client_port == -1){
         log_message("Error: Unable to find free port");
         return 1;
     }
+    pthread_mutex_unlock(&config.config_mutex);
 
     // Parse Accessible Paths, Tokenise with , and store in config
     parse_paths(argv[2]);
@@ -71,12 +81,17 @@ int main(int argc, char *argv[]) {
     // Register with Naming Server
     register_with_naming_server();
 
+    //Initialize locks
+    initialize_file_locks();
+
     // Create a socket to listen for client connections
     int server_sock = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
+    pthread_mutex_lock(&config.config_mutex);
     server_addr.sin_port = htons(config.ss_client_port);
+    pthread_mutex_unlock(&config.config_mutex);
 
     if (bind(server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
         log_message("Error: Failed to bind Client socket");
@@ -85,7 +100,11 @@ int main(int argc, char *argv[]) {
 
     listen(server_sock, MAX_CLIENTS);
     char * message;
+
+    pthread_mutex_lock(&config.config_mutex);
     asprintf(&message, "SUCCESS: Storage Server running on port Client_port %d", config.ss_client_port);
+    pthread_mutex_unlock(&config.config_mutex);
+    
     log_message(message);
 
     // Accept client connections and handle requests

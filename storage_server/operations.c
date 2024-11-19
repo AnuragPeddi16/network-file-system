@@ -140,8 +140,10 @@ int handle_client_create_request(const char* path) {
 
     if (strcmp(type, "FILE") == 0) { 
         //Add to config accessible paths
+        pthread_mutex_lock(&config.config_mutex);
         config.num_paths++;
         strcpy(config.accessible_paths[config.num_paths],actual_path);
+        pthread_mutex_unlock(&config.config_mutex);
 
         // Create an empty file (original implementation)
         FILE* file = fopen(actual_path, "w");
@@ -155,8 +157,10 @@ int handle_client_create_request(const char* path) {
         return 0;
     }
     else if (strcmp(type, "FOLDER") == 0) {
+        pthread_mutex_lock(&config.config_mutex);
         config.num_paths++;
         strcpy(config.accessible_paths[config.num_paths],actual_path);
+        pthread_mutex_unlock(&config.config_mutex);
         // Create directory with 0755 permissions
         if (mkdir(actual_path, 0755) != 0) {
             log_message("ERROR: Unable to create folder");
@@ -191,7 +195,8 @@ int handle_client_delete_request(const char* path) {
     char* actual_path=malloc(sizeof(upath)+4);
     strcpy(actual_path,"./");
     strcat(actual_path,upath);
-
+    
+    pthread_mutex_lock(&config.config_mutex);
     for(int i=0;i<config.num_paths;i++){
         if(strcmp(config.accessible_paths[i],actual_path)==0){
             for(int j=i;j<config.num_paths-1;j++){
@@ -201,6 +206,7 @@ int handle_client_delete_request(const char* path) {
             break;
         }
     }
+    pthread_mutex_unlock(&config.config_mutex);
 
     //Check
     if (type == NULL || actual_path == NULL) {
@@ -278,12 +284,14 @@ int handle_client_stream_request(const char* upath, int client_socket) {
 
 // Handle LIST request
 int handle_client_list_request(int client_socket) {
+    pthread_mutex_lock(&config.config_mutex);
     char response[BUFFER_SIZE] = "Accessible Paths:\n";
     for (int i = 0; i < config.num_paths; i++) {
         strcat(response, config.accessible_paths[i]);
         strcat(response, "\n");
     }
     send(client_socket, response, strlen(response), 0);
+    pthread_mutex_unlock(&config.config_mutex);
     return 0;
 }
 
@@ -434,12 +442,14 @@ int unzip_received_data(const char* input) {
     log_message(log_msg);
 
     // Update accessible paths
+    pthread_mutex_lock(&config.config_mutex);
     if (config.num_paths < MAX_ACCESSIBLE_PATHS) {
         snprintf(config.accessible_paths[config.num_paths], 
                  MAX_PATH_LENGTH, 
                  "%s", destination_path);
         config.num_paths++;
     }
+    pthread_mutex_unlock(&config.config_mutex);
     return 0;
 }
 
@@ -465,14 +475,35 @@ void* handle_client_request(void* client_socket_ptr) {
         send(client_sock, FAILED, strlen(FAILED), 0);
     } 
     else if (strcmp(operation, "READ") == 0) {
+        FileLock* lock = get_file_lock(path);
+        if(lock==NULL){
+            perror("Can't lock file");
+            return NULL;
+        }
+        pthread_mutex_lock(&lock->mutex);
+        lock->ref_count++;
+        release_file_lock(lock);
+        
         if (handle_client_read_request(path, client_sock) == 0) {
             send(client_sock, ACK, strlen(ACK), 0);
         } 
         else {
             send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
         }
+        pthread_mutex_lock(&lock->mutex);
+        lock->ref_count--;
+        release_file_lock(lock);
     } 
     else if (strcmp(operation, "WRITE") == 0) {
+        //Get Lock and Do not unlock Write complete
+        FileLock* lock = get_file_lock(path);
+        if(lock==NULL){
+            perror("Can't lock file");
+            return NULL;
+        }
+        pthread_mutex_lock(&lock->mutex);
+
+
         char* data = strtok(NULL, "\0");  // Get entire remaining data
         if (data) {
             // Get data size
@@ -489,6 +520,10 @@ void* handle_client_request(void* client_socket_ptr) {
                 send(client_sock, ACK, strlen(ACK), 0);
                 if (handle_client_write_request(path, data) != 0) {
                     send(sock, "ASYNC FAILED", strlen("ASYNC FAILED"), 0); // Send FAILED to Naming Server
+
+                    //Release Lock
+                    lock->ref_count--;
+                    release_file_lock(lock);
                     return NULL;
                 }
                 send(sock, "ASYNC DONE", strlen("ASYNC DONE"), 0);
@@ -496,6 +531,10 @@ void* handle_client_request(void* client_socket_ptr) {
             else {      
                 if (handle_client_write_request(path, data) != 0) {  // Synchronous Write
                     send(client_sock, FAILED, strlen(FAILED), 0);
+                    
+                    //Release Lock
+                    lock->ref_count--;
+                    release_file_lock(lock);
                     return NULL;
                 }
                 send(client_sock, ACK, strlen(ACK), 0);    
@@ -504,6 +543,10 @@ void* handle_client_request(void* client_socket_ptr) {
         else {
             send(client_sock, FAILED, strlen(FAILED), 0);
         }
+
+        //Release Lock
+        lock->ref_count--;
+        release_file_lock(lock);
     } 
     else if (strcmp(operation, "CREATE") == 0) {
         if (handle_client_create_request(path) == 0) {
@@ -513,11 +556,24 @@ void* handle_client_request(void* client_socket_ptr) {
         }
     }
     else if (strcmp(operation, "DELETE") == 0) {
+        // FileLock* lock = get_file_lock(path);
+        // if(lock==NULL){
+        //     perror("Can't lock file");
+        //     return;
+        // }
+        // while(1){
+        //     pthread_mutex_lock(&lock->mutex);
+        //     if(lock->ref_count==0){
+        //         break;
+        //     }
+        //     pthread_mutex_unlock(&lock->mutex);
+        // }
         if (handle_client_delete_request(path) == 0) {
             send(client_sock, ACK, strlen(ACK), 0);
         } else {
             send(client_sock, FAILED, strlen(FAILED), 0);
         }
+        // pthread_mutex_unlock(&lock->mutex);
     } 
     else if (strcmp(operation, "INFO") == 0) {
         char info_buffer[BUFFER_SIZE];

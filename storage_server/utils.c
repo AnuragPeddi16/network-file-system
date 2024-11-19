@@ -19,6 +19,7 @@ char* trim_whitespace(char* str) {
 
 // Parsing function
 void parse_paths(char* paths_arg) {
+    pthread_mutex_lock(&config.config_mutex);
     config.num_paths = 0;
 
     // Use a copy of the argument to avoid modifying original
@@ -60,6 +61,7 @@ void parse_paths(char* paths_arg) {
     }
     char* message;
     asprintf(&message, "SUCCESS: Discovered %d paths:\n", config.num_paths);
+    pthread_mutex_unlock(&config.config_mutex);
     log_message(message);
 }
 
@@ -147,34 +149,33 @@ char* get_storage_server_ip() {
 
 // Initialization function to be called at server startup
 void initialize_file_locks() {
-    for (int i = 0; i < MAX_CONCURRENT_FILES; i++) {
-        file_locks[i].filename[0] = '\0';
+    pthread_mutex_init(&file_locks_mutex, NULL);
+
+    pthread_mutex_lock(&file_locks_mutex);
+    pthread_mutex_lock(&config.config_mutex);
+    for (int i = 0; i < config.num_paths; i++) {
+        pthread_mutex_init(&file_locks[i].mutex, NULL);
+        strcpy(file_locks[i].filename,config.accessible_paths[i]);
         file_locks[i].ref_count = 0;
     }
+    pthread_mutex_unlock(&config.config_mutex);
+    pthread_mutex_unlock(&file_locks_mutex);
 }
 
 // Function to get or create a lock for a specific file
 FileLock* get_file_lock(const char* filename) {
     pthread_mutex_lock(&file_locks_mutex);
     
-    // Try to find existing lock or empty slot
-    for (int i = 0; i < MAX_CONCURRENT_FILES; i++) {
-        if (file_locks[i].filename[0] == '\0' || 
-            strcmp(file_locks[i].filename, filename) == 0) {
-            
-            // Initialize lock if not already done
-            if (file_locks[i].filename[0] == '\0') {
-                strncpy(file_locks[i].filename, filename, MAX_PATH_LENGTH - 1);
-                pthread_mutex_init(&file_locks[i].mutex, NULL);
-                file_locks[i].ref_count = 0;
-            }
-            
+    pthread_mutex_lock(&config.config_mutex);
+    for (int i = 0; i < config.num_paths; i++) {
+        if (strcmp(file_locks[i].filename, filename) == 0) {
             file_locks[i].ref_count++;
+            pthread_mutex_unlock(&config.config_mutex);
             pthread_mutex_unlock(&file_locks_mutex);
             return &file_locks[i];
         }
     }
-    
+    pthread_mutex_unlock(&config.config_mutex);
     pthread_mutex_unlock(&file_locks_mutex);
     return NULL; // No available locks
 }
@@ -184,14 +185,6 @@ void release_file_lock(FileLock* lock) {
     if (lock == NULL) return;
 
     pthread_mutex_lock(&file_locks_mutex);
-    lock->ref_count--;
-
-    // If no more references, reset the lock
-    if (lock->ref_count <= 0) {
-        pthread_mutex_destroy(&lock->mutex);
-        lock->filename[0] = '\0';
-        lock->ref_count = 0;
-    }
-    
+    lock->ref_count--;    
     pthread_mutex_unlock(&file_locks_mutex);
 }

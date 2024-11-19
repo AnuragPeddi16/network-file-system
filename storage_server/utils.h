@@ -16,6 +16,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include <time.h>
+#include <fcntl.h>
 
 // Define constants
 #define BUFFER_SIZE 4096
@@ -33,6 +34,7 @@ typedef struct {
     int ss_client_port; // Port for client connections
     char accessible_paths[MAX_ACCESSIBLE_PATHS][BUFFER_SIZE];
     int num_paths;
+    pthread_mutex_t config_mutex;
 } StorageServerConfig;
 
 // Structure to manage file locks
