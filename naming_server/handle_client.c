@@ -567,3 +567,29 @@ void *client_handler(void *client_sock_fd) {
     close(client_fd);
     return NULL;
 }
+
+
+
+int add_backups(StorageServer* ss) {
+
+    int count = ss->num_backups;
+    if (count >= 2) return count;
+
+    for (int i = server_count-1; i >= 0; i--) {
+
+        if (storage_servers[i].active) {
+
+            ss->backups[count] = &storage_servers[i];
+            
+            add_backups(&storage_servers[i]);
+            count++;
+
+        }
+
+        if (count >= 2) break;
+
+    }
+
+    return count;
+
+}
