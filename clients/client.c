@@ -347,20 +347,40 @@ int handle_delete_operation(const char *path)
     if (naming_server_fd < 0)
         return -1;
 
-    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_DELETE);
+    char request[BUFFER_SIZE];
+    snprintf(request, sizeof(request), "DELETE %s\n", path);
+    send(naming_server_fd, request, strlen(request), 0);
 
-    if (storage_server.status == 1)
+    // Wait for acknowledgment
+    char response[BUFFER_SIZE] = {0};
+    recv(naming_server_fd, response, sizeof(response) - 1, 0);
+    if (response[0]=='1')
     {
         printf(GREEN("File/Folder deleted normally\n"));
     }
-    else if (storage_server.status == 3)
+    else if (response[0]=='3')
     {
-        printf(MAGENTA("File/Folder deletion failed\n"));
+        printf(MAGENTA("File/Folder delete failed\n"));
     }
     else
     {
-        printf(RED("deletion unknown error\n"));
+        printf(RED("delete unknown error\n"));
     }
+
+    // ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_DELETE);
+
+    // if (storage_server.status == 1)
+    // {
+    //     printf(GREEN("File/Folder deleted normally\n"));
+    // }
+    // else if (storage_server.status == 3)
+    // {
+    //     printf(MAGENTA("File/Folder deletion failed\n"));
+    // }
+    // else
+    // {
+    //     printf(RED("deletion unknown error\n"));
+    // }
 
     close(naming_server_fd);
 
