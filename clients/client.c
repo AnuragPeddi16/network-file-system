@@ -288,6 +288,72 @@ int handle_stream_operation(const char *path)
     close(storage_fd);
     return 0;
 }
+int handle_info_operation(const char *path)
+{
+    // Connect to naming server
+    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
+    if (naming_server_fd < 0)
+        return -1;
+
+    // Get storage server info
+    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_READ);
+    close(naming_server_fd);
+    // printf()
+
+    // if (storage_server.status != 0)
+    // { // put other status code also
+    //     printf("Failed to get storage server information\n");
+    //     return -1;
+    // }
+
+    switch(storage_server.status) {
+        case OK:
+            printf(GREEN("STATUS CODE : OK\n"));
+            break;
+        case ACK:
+            printf(YELLOW("STATUS CODE : ACK\n"));
+            break;
+        case NOT_FOUND:
+            printf(RED("STATUS CODE : NOT_FOUND\n"));
+            break;
+        case FAILED:
+            printf(MAGENTA("STATUS CODE : FAILED\n"));
+            break;
+        case ASYNCHRONOUS_COMPLETE:
+            printf(CYAN("STATUS CODE : ASYNCHRONOUS_COMPLETE\n"));
+            break;
+        default:
+            printf("Unknown operation\n");
+            storage_server.status = -1;
+            // return storage_server;
+
+    }
+
+    // Connect to storage server
+    int storage_fd = connect_to_server(storage_server.ip, storage_server.port);
+    if (storage_fd < 0)
+        return -1;
+
+    // Send info request
+    char request[BUFFER_SIZE];
+    snprintf(request, sizeof(request), "INFO %s", path);
+    send(storage_fd, request, strlen(request), 0);
+
+    // Receive and display file content
+    char buffer[BUFFER_SIZE];
+    int bytes_received;
+    while ((bytes_received = recv(storage_fd, buffer, sizeof(buffer) - 1, 0)) > 0)
+    {
+        buffer[bytes_received] = '\0';
+        printf("%s", buffer);
+        if (strstr(buffer, "STOP") != NULL)
+            break;
+    }
+
+    close(storage_fd);
+    return 0;
+}
+
 
 //talk only to ns
 int handle_create_operation(const char *path, const char *name)

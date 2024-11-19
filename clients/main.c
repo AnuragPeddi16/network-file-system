@@ -174,6 +174,16 @@ void execute_command(int argc, char** args) {
             printf("Copy operation completed successfully.\n");
         }
     }
+    else if (strcmp(cmd, "INFO") == 0){
+        if (argc != 2) {
+            printf("Usage: INFO <path>\n");
+            return;
+        }
+        if (handle_stream_operation(args[1]) == 0) {
+            printf("INFO operation completed successfully.\n");
+        }
+    }
+    
     else if (strcmp(cmd, "EXIT") == 0) {
         printf("Goodbye!\n");
         exit(0);

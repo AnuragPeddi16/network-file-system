@@ -47,6 +47,7 @@ ServerInfo get_storage_server_info(int naming_server_fd, const char* path, int o
 int handle_read_operation(const char* path);
 int handle_write_operation(const char* path, const char* content);
 int handle_create_operation(const char* path, const char* name);
+int handle_info_operation(const char *path);
 int handle_delete_operation(const char* path);
 int handle_list_operation();
 int handle_stream_operation(const char* path);
