@@ -30,7 +30,7 @@
 void* handle_client_request(void* client_socket_ptr);
 int handle_client_read_request(const char* path, int client_socket);
 int handle_client_write_request(const char* path, const char* data);
-int handle_client_create_request(const char* path);
+int handle_client_create_request(const char* type,const char* path);
 int handle_client_delete_request(const char* type,const char* path);
 int handle_client_info_request(const char* path, char* info_buffer);
 int handle_client_stream_request(const char* path, int client_socket);

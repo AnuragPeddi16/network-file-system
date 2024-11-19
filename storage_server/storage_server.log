@@ -696,3 +696,81 @@
 ] Folder Deleted
 [Wed Nov 20 04:31:59 2024
 ] Delete Success
+[Wed Nov 20 04:37:56 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:37:56 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:37:56 2024
+] SUCCESS: Storage Server running on port Client_port 53127
+[Wed Nov 20 04:38:39 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:38:39 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:38:39 2024
+] SUCCESS: Storage Server running on port Client_port 34111
+[Wed Nov 20 04:39:07 2024
+] Create Request:FOLDER Path=(null)
+[Wed Nov 20 04:42:39 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:42:39 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:42:39 2024
+] SUCCESS: Storage Server running on port Client_port 56201
+[Wed Nov 20 04:43:11 2024
+] Create Request:FILE Path=(null)
+[Wed Nov 20 04:44:42 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:44:42 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:44:42 2024
+] SUCCESS: Storage Server running on port Client_port 40485
+[Wed Nov 20 04:44:58 2024
+] Create Request:FILE Path=(null)
+[Wed Nov 20 04:47:28 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:47:28 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:47:28 2024
+] SUCCESS: Storage Server running on port Client_port 57511
+[Wed Nov 20 04:47:59 2024
+] CREATE FILE a/c.c
+[Wed Nov 20 04:47:59 2024
+] Create Request:FILE Path=(null)
+[Wed Nov 20 04:52:18 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:52:18 2024
+] Registration connection failed
+[Wed Nov 20 04:52:18 2024
+] SUCCESS: Storage Server running on port Client_port 44403
+[Wed Nov 20 04:52:28 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:52:28 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:52:28 2024
+] SUCCESS: Storage Server running on port Client_port 55347
+[Wed Nov 20 04:52:38 2024
+] CREATE FILE /a/c.c
+[Wed Nov 20 04:52:38 2024
+] Create Request:FILE Path=/a/c.c
+[Wed Nov 20 04:52:38 2024
+] File created
+[Wed Nov 20 04:53:14 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:53:14 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:53:14 2024
+] SUCCESS: Storage Server running on port Client_port 38677
+[Wed Nov 20 04:53:23 2024
+] CREATE FOLDER b/c/
+[Wed Nov 20 04:53:23 2024
+] Create Request:FOLDER Path=b/c/
+[Wed Nov 20 04:53:23 2024
+] Folder created

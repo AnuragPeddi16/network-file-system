@@ -120,25 +120,16 @@ int handle_client_read_request(const char* upath, int client_socket) {
     return 0;
 }
 
-int handle_client_create_request(const char* path) {
-    // If you want to tokenize `path` further
-    char path_copy[MAX_PATH_LENGTH];
-    strncpy(path_copy, path, sizeof(path_copy) - 1);
-    path_copy[sizeof(path_copy) - 1] = '\0';
- 
-    // Tokenize to type
-    char* type = strtok(path_copy, " ");
-
+int handle_client_create_request(const char* type,const char* path) { 
     // Log the Create attempt
     char log_msg[256];
     snprintf(log_msg, sizeof(log_msg), "Create Request:%s Path=%s",type,path);
     log_message(log_msg);
 
     //Tokenise path
-    char* upath = strtok(NULL, " ");
-    char* actual_path=malloc(sizeof(upath)+4);
+    char* actual_path=malloc(sizeof(path)+4);
     strcpy(actual_path,"./");
-    strcat(actual_path,upath);
+    strcat(actual_path,path);
 
     //Add to Concurrent paths
     pthread_mutex_lock(&file_locks_mutex);
@@ -146,7 +137,7 @@ int handle_client_create_request(const char* path) {
 
     int i=config.num_paths+1;
     pthread_mutex_init(&file_locks[i].mutex, NULL);
-    strcpy(file_locks[i].filename,upath);
+    strcpy(file_locks[i].filename,path);
     file_locks[i].ref_count = 0;
 
     pthread_mutex_unlock(&config.config_mutex);
@@ -156,7 +147,7 @@ int handle_client_create_request(const char* path) {
         //Add to config accessible paths
         pthread_mutex_lock(&config.config_mutex);
         config.num_paths++;
-        strcpy(config.accessible_paths[config.num_paths],upath);
+        strcpy(config.accessible_paths[config.num_paths],path);
         pthread_mutex_unlock(&config.config_mutex);
 
         // Create an empty file (original implementation)
@@ -173,7 +164,7 @@ int handle_client_create_request(const char* path) {
     else if (strcmp(type, "FOLDER") == 0) {
         pthread_mutex_lock(&config.config_mutex);
         config.num_paths++;
-        strcpy(config.accessible_paths[config.num_paths],upath);
+        strcpy(config.accessible_paths[config.num_paths],path);
         pthread_mutex_unlock(&config.config_mutex);
 
         // Create directory with 0755 permissions
@@ -504,6 +495,7 @@ void* handle_client_request(void* client_socket_ptr) {
     buffer[bytes_read] = '\0';
 
     // Tokenize the request
+    log_message(buffer);
     char* operation = strtok(buffer, " ");
     char* path = strtok(NULL, " ");  // For CREATE/DELETE/COPY It will be FILE/FOLDER
 
@@ -600,7 +592,9 @@ void* handle_client_request(void* client_socket_ptr) {
         lock->ref_count--;
     } 
     else if (strcmp(operation, "CREATE") == 0) {
-        if (handle_client_create_request(path) == 0) {
+        printf("%s",path); //Path is type
+        char* upath = strtok(NULL," ");
+        if (handle_client_create_request(path,upath) == 0) {
             int ack = htonl(ACK);
             send(client_sock,&ack,sizeof(ack), 0);
         } else {
