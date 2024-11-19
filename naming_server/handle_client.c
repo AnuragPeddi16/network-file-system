@@ -20,6 +20,8 @@ void send_ss_to_client(StorageServer* ss, int client_fd) {
     if (send(client_fd, response, sizeof(ClientResponse), 0) < 0) {
 
         print_error("Error sending response to client");
+        free(response);
+        return;
 
     }
 
@@ -56,10 +58,33 @@ void handle_read_request(int client_fd, char *file_path) {
 }
 
 // Function to handle write requests
-void handle_write_request(int client_fd, char *file_path) {
+void handle_write_request(int client_fd, char *remaining_command) {
+
+    bool sync = false;
+    if (strstr(remaining_command, "-SYNC") != NULL) sync = true;
     
+    char* file_path = strtok(remaining_command, " ");
+    if (sync) file_path = strtok(NULL, " ");
+    char* data = strtok(NULL, "");
+
     StorageServer* ss = cache_search_insert(file_path);
     send_ss_to_client(ss, client_fd);
+
+    if (strlen(data) < ASYNC_LIMIT || sync) return;
+
+    int ack;
+    if (recv(ss->fd, &ack, sizeof(ack), 0) < 0) {
+
+        print_error("reading async ack failed");
+        return;
+
+    }
+
+    if (send(client_fd, &ack, sizeof(ack), 0) < 0) {
+
+        print_error("sending async ack failed");
+
+    }
 
 }
 
@@ -181,7 +206,8 @@ void handle_copy_request(int client_fd, char *paths) {
 
     if (source_path == NULL || destination_path == NULL) {
 
-        if (send(client_fd, "2", sizeof("2"), 0) < 0) print_error("Error sending status to client");
+        int status = htonl(NOT_FOUND);
+        if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending status to client");
         return;
 
     }
@@ -201,7 +227,8 @@ void handle_copy_request(int client_fd, char *paths) {
 
     if (source_ss == NULL || destination_ss == NULL) {
         
-        if (send(client_fd, "2", sizeof("2"), 0) < 0) print_error("Error sending status to client");
+        int status = htonl(NOT_FOUND);
+        if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending status to client");
         return;
 
     }
@@ -227,7 +254,8 @@ void handle_copy_request(int client_fd, char *paths) {
 
     if (status != OK) {
 
-        if (send(client_fd, "3", sizeof("3"), 0) < 0) print_error("Error sending status to client");
+        status = htonl(status);
+        if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending status to client");
         return;
 
     }

@@ -29,7 +29,7 @@ char* trim(char* str) {
 // Parse command line into arguments
 int parse_command(char* line, char** args) {
     int argc = 0;
-    char* token;
+    // char* token;
     char* rest = line;
     int in_quotes = 0;
     char* quote_start = NULL;
@@ -105,6 +105,7 @@ void execute_command(int argc, char** args) {
     for (int i = 0; cmd[i]; i++) {
         cmd[i] = toupper(cmd[i]);
     }
+    printf("Command: %s\n", cmd);
 
     if (strcmp(cmd, "HELP") == 0) {
         print_help();
