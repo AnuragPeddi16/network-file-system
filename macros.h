@@ -9,6 +9,7 @@
 #define NOT_FOUND 2
 #define FAILED 3
 #define ASYNCHRONOUS_COMPLETE 4
+#define SS_DOWN 5
 
 /* COLORS */
 

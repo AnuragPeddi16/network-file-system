@@ -72,6 +72,11 @@ StorageServer* search_path(char *path) {
 
     pthread_mutex_lock(&server_mutex);
     for (int i = 0; i < server_count; i++) {
+
+        if (!is_socket_connected(storage_servers[i].fd)) storage_servers[i].active = false;
+        else storage_servers[i].active = true;
+        if (!storage_servers[i].active) continue;
+
         if (search_path_trie(storage_servers[i].paths_root, path)) {
             pthread_mutex_unlock(&server_mutex);
             return &storage_servers[i];

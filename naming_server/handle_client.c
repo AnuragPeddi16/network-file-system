@@ -84,13 +84,53 @@ void handle_write_request(int client_fd, char *remaining_command) {
 
     if (strlen(data) < ASYNC_LIMIT || sync) return;
 
-    int ack;
-    if (recv(ss->fd, &ack, sizeof(ack), 0) < 0) {
+    struct pollfd pfd;
+    pfd.fd = ss->fd;
+    pfd.events = POLLIN; // Monitor for data to read
 
-        print_error("reading async ack failed");
-        return;
+    bool isAlive = true;
 
+    log_message("Writing asynchronously, waiting...\n");
+    while (1) {
+        int result = poll(&pfd, 1, -1); // Infinite wait
+
+        if (result > 0) {
+            if (pfd.revents & POLLIN) {
+                // Data is available to read
+                break;
+            }
+            if (pfd.revents & POLLHUP) {
+                // Hang-up detected; connection is closed
+                isAlive = false;
+                break;
+            }
+            if (pfd.revents & POLLERR) {
+                // Error on the socket
+                print_error("Poll socket error");
+                isAlive = false;
+                break;
+            }
+        } else if (result == 0) {
+            // Timeout (shouldn't happen with infinite wait)
+            printf("No events occurred (unexpected timeout).\n");
+        } else {
+            // `poll` failed
+            print_error("poll failed");
+            break;
+        }
     }
+
+    int ack;
+    if (isAlive) {
+
+        if (recv(ss->fd, &ack, sizeof(ack), 0) < 0) {
+
+            print_error("reading async ack failed");
+            return;
+
+        }
+
+    } else ack = SS_DOWN;
 
     if (send(client_fd, &ack, sizeof(ack), 0) < 0) {
 

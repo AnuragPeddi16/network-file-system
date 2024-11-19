@@ -147,11 +147,11 @@ void execute_command(int argc, char** args) {
         }
     }
     else if (strcmp(cmd, "LIST") == 0) {
-        if (argc != 2) {
-            printf("Usage: LIST <path>\n");
+        if (argc != 1) {
+            printf("Usage: LIST \n");
             return;
         }
-        if (handle_list_operation(args[1]) == 0) {
+        if (handle_list_operation()==0) {
             printf("List operation completed successfully.\n");
         }
     }

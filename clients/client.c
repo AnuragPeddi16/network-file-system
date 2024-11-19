@@ -296,19 +296,25 @@ int handle_create_operation(const char *path, const char *name)
     if (naming_server_fd < 0)
         return -1;
 
-    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_CREATE);
+    char request[BUFFER_SIZE];
+    snprintf(request, sizeof(request), "CREATE %s\n", path);
+    send(naming_server_fd, request, strlen(request), 0);
 
-    if (storage_server.status == 1)
+    // Wait for acknowledgment
+    int response;
+    recv(naming_server_fd, &response, sizeof(response), 0);
+    response = ntohl(response);
+    if (response == ACK)
     {
         printf(GREEN("File/Folder created normally\n"));
     }
-    else if (storage_server.status == 3)
+    else if (response == FAILED)
     {
-        printf(MAGENTA("File/Folder create failed\n"));
+        printf(MAGENTA("File/Folder creation failed\n"));
     }
     else
     {
-        printf(RED("creating unknown error\n"));
+        printf(RED("creation unknown error\n"));
     }
 
     
@@ -347,68 +353,134 @@ int handle_delete_operation(const char *path)
     if (naming_server_fd < 0)
         return -1;
 
-    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_DELETE);
-    close(naming_server_fd);
-
-    if (storage_server.port == 0)
-    {
-        printf("Failed to get storage server information\n");
-        return -1;
-    }
-
-    int storage_fd = connect_to_server(storage_server.ip, storage_server.port);
-    if (storage_fd < 0)
-        return -1;
-
-    // Send delete request
     char request[BUFFER_SIZE];
-    snprintf(request, sizeof(request), "DELETE %s", path);
-    send(storage_fd, request, strlen(request), 0);
+    snprintf(request, sizeof(request), "DELETE %s\n", path);
+    send(naming_server_fd, request, strlen(request), 0);
 
     // Wait for acknowledgment
-    char response[BUFFER_SIZE] = {0};
-    recv(storage_fd, response, sizeof(response) - 1, 0);
+    int response;
+    recv(naming_server_fd, &response, sizeof(response), 0);
+    response = ntohl(response);
+    if (response == ACK)
+    {
+        printf(GREEN("File/Folder deleted normally\n"));
+    }
+    else if (response == FAILED)
+    {
+        printf(MAGENTA("File/Folder delete failed\n"));
+    }
+    else
+    {
+        printf(RED("delete unknown error\n"));
+    }
 
-    close(storage_fd);
-    return (strstr(response, "SUCCESS") != NULL) ? 0 : -1;
+    // ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_DELETE);
+
+    // if (storage_server.status == 1)
+    // {
+    //     printf(GREEN("File/Folder deleted normally\n"));
+    // }
+    // else if (storage_server.status == 3)
+    // {
+    //     printf(MAGENTA("File/Folder deletion failed\n"));
+    // }
+    // else
+    // {
+    //     printf(RED("deletion unknown error\n"));
+    // }
+
+    close(naming_server_fd);
+
+    // if (storage_server.port == 0)
+    // {
+    //     printf("Failed to get storage server information\n");
+    //     return -1;
+    // }
+
+    // int storage_fd = connect_to_server(storage_server.ip, storage_server.port);
+    // if (storage_fd < 0)
+    //     return -1;
+
+    // // Send delete request
+    // char request[BUFFER_SIZE];
+    // snprintf(request, sizeof(request), "DELETE %s", path);
+    // send(storage_fd, request, strlen(request), 0);
+
+    // // Wait for acknowledgment
+    // char response[BUFFER_SIZE] = {0};
+    // recv(storage_fd, response, sizeof(response) - 1, 0);
+
+    // close(storage_fd);
+    // return (strstr(response, "SUCCESS") != NULL) ? 0 : -1;
+    return 0;
 }
 
-int handle_list_operation(const char *path)
+int handle_list_operation()
 {
     int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
-    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_LIST);
-    close(naming_server_fd);
+    // ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_LIST);
 
-    if (storage_server.port == 0)
-    {
-        printf("Failed to get storage server information\n");
-        return -1;
-    }
+    // int storage_fd = connect_to_server(storage_server.ip, storage_server.port);
 
-    int storage_fd = connect_to_server(storage_server.ip, storage_server.port);
-    if (storage_fd < 0)
-        return -1;
+    // // Receive and display file content
 
-    // Send list request
-    char request[BUFFER_SIZE];
-    snprintf(request, sizeof(request), "LIST %s", path);
-    send(storage_fd, request, strlen(request), 0);
+    // snprintf(request, sizeof(request), "LIST\n");
+    send(naming_server_fd, "LIST\n", strlen("LIST\n"), 0);
 
-    // Receive and display directory listing
     char buffer[BUFFER_SIZE];
     int bytes_received;
-    while ((bytes_received = recv(storage_fd, buffer, sizeof(buffer) - 1, 0)) > 0)
-    {
+    while ((bytes_received = recv(naming_server_fd, buffer, sizeof(buffer) - 1, 0)) > 0) {
         buffer[bytes_received] = '\0';
-        printf("%s", buffer);
-        if (strstr(buffer, "STOP") != NULL)
+        // Split the buffer and print only non-STOP parts
+        char* token = strtok(buffer, "STOP");
+        if (token) {
+            printf("%s", token);
+        }
+        if (strstr(buffer, "STOP") != NULL) {
             break;
-    }
+        }
 
-    close(storage_fd);
+    }
+    // while ((bytes_received = recv(naming_server_fd, buffer, sizeof(buffer) - 1, 0)) > 0)  //i am stoobid
+    // {
+    //     buffer[bytes_received] = '\0';
+    //     printf("%s", buffer);
+    //     if (strstr(buffer, "STOP") != NULL)
+    //         break;
+    // }
+
+    close(naming_server_fd);
+
+    // if (storage_server.port == 0)
+    // {
+    //     printf("Failed to get storage server information\n");
+    //     return -1;
+    // }
+
+    // int storage_fd = connect_to_server(storage_server.ip, storage_server.port);
+    // if (storage_fd < 0)
+    //     return -1;
+
+    // // Send list request
+    // char request[BUFFER_SIZE];
+    // snprintf(request, sizeof(request), "LIST %s", path);
+    // send(storage_fd, request, strlen(request), 0);
+
+    // // Receive and display directory listing
+    // char buffer[BUFFER_SIZE];
+    // int bytes_received;
+    // while ((bytes_received = recv(storage_fd, buffer, sizeof(buffer) - 1, 0)) > 0)
+    // {
+    //     buffer[bytes_received] = '\0';
+    //     printf("%s", buffer);
+    //     if (strstr(buffer, "STOP") != NULL)
+    //         break;
+    // }
+
+    // close(storage_fd);
     return 0;
 }
 
@@ -418,15 +490,27 @@ int handle_copy_operation(const char *source, const char *dest)
     if (naming_server_fd < 0)
         return -1;
 
-    // For copy, we need to communicate only with naming server as it handles the copy operation
     char request[BUFFER_SIZE];
-    snprintf(request, sizeof(request), "COPY %s %s", source, dest);
+    snprintf(request, sizeof(request), "COPY %s %s\n", source, dest);
     send(naming_server_fd, request, strlen(request), 0);
 
     // Wait for acknowledgment
-    char response[BUFFER_SIZE] = {0};
-    recv(naming_server_fd, response, sizeof(response) - 1, 0);
+    int response;
+    recv(naming_server_fd, &response, sizeof(response), 0);
+    response = ntohl(response);
+    if (response == ACK)
+    {
+        printf(GREEN("File/Folder deleted normally\n"));
+    }
+    else if (response == FAILED)
+    {
+        printf(MAGENTA("File/Folder delete failed\n"));
+    }
+    else
+    {
+        printf(RED("delete unknown error\n"));
+    }    
 
     close(naming_server_fd);
-    return (strstr(response, "SUCCESS") != NULL) ? 0 : -1;
+    return 0;
 }
