@@ -634,3 +634,65 @@
 ] Delete Request:FILE Path=a/try.c
 [Wed Nov 20 04:09:58 2024
 ] ERROR: Unable to Delete file
+[Wed Nov 20 04:17:22 2024
+] SUCCESS: Discovered 2 paths:
+
+[Wed Nov 20 04:17:22 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:17:22 2024
+] SUCCESS: Storage Server running on port Client_port 46553
+[Wed Nov 20 04:19:29 2024
+] SUCCESS: Discovered 2 paths:
+
+[Wed Nov 20 04:19:29 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:19:29 2024
+] SUCCESS: Storage Server running on port Client_port 60291
+[Wed Nov 20 04:22:31 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 04:22:31 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:22:31 2024
+] SUCCESS: Storage Server running on port Client_port 49571
+[Wed Nov 20 04:22:47 2024
+] Read Request: Path=./a/old.c
+[Wed Nov 20 04:22:47 2024
+] READ SUCCESS
+[Wed Nov 20 04:23:08 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 04:23:08 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:23:08 2024
+] SUCCESS: Storage Server running on port Client_port 44429
+[Wed Nov 20 04:23:33 2024
+] Delete Request:FILE Path=a/old.c
+[Wed Nov 20 04:23:33 2024
+] File Deleted
+[Wed Nov 20 04:23:33 2024
+] Delete Success
+[Wed Nov 20 04:25:27 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:25:27 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:25:27 2024
+] SUCCESS: Storage Server running on port Client_port 42297
+[Wed Nov 20 04:25:43 2024
+] Delete Request:FOLDER Path=a/
+[Wed Nov 20 04:25:43 2024
+] ERROR: Unable to create folder
+[Wed Nov 20 04:31:42 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:31:42 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:31:42 2024
+] SUCCESS: Storage Server running on port Client_port 33977
+[Wed Nov 20 04:31:59 2024
+] Delete Request:FOLDER Path=a/
+[Wed Nov 20 04:31:59 2024
+] Folder Deleted
+[Wed Nov 20 04:31:59 2024
+] Delete Success

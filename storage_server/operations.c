@@ -192,15 +192,6 @@ int handle_client_create_request(const char* path) {
 
 // Handle DELETE request
 int handle_client_delete_request(const char* type, const char* path) {
-    // If you want to tokenize `path` further
-    // char path_copy[MAX_PATH_LENGTH];
-    // strcpy(path_copy, upath);
-    // printf("%s",path_copy);
-
-    // Tokenize to type
-    // char* type = strtok(path_copy, " ");
-    // char* path=strtok(NULL, "");
-
     // Log the Create attempt
     char log_msg[256];
     snprintf(log_msg, sizeof(log_msg), "Delete Request:%s Path=%s",type,path);
@@ -243,20 +234,24 @@ int handle_client_delete_request(const char* type, const char* path) {
     if (strcmp(type, "FILE") == 0) {
         
         // Delete a file
-        if (remove(actual_path)) {
-            return 0;
+        if (remove(actual_path)== 0) {
             log_message("File Deleted");
+            return 0;
         }
         log_message("ERROR: Unable to Delete file");
         return -1;
     }
     else if (strcmp(type, "FOLDER") == 0) {
         // Delete a directory
-        if (rmdir(actual_path) == 0) {
-            return 0;
+        char command[1024];
+        snprintf(command, sizeof(command), "rm -rf \"%s\"", path);
+        int result = system(command);
+
+        if (result == 0) {
             log_message("Folder Deleted");
+            return 0;
         }
-        log_message("ERROR: Unable to create folder");
+        log_message("ERROR: Unable to DELETE folder");
         return -1;
         
     }
