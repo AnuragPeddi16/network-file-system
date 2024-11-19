@@ -18,8 +18,9 @@ typedef struct TrieNode {
 
 TrieNode *create_node(char *path_component, bool isFile);
 void insert_path_trie(TrieNode *root, char *path);
-bool search_path_trie(TrieNode *root, char *path);
+TrieNode* search_path_trie(TrieNode *root, char *path);
 void delete_path_trie(TrieNode *root, char *path);
 void store_all_paths_trie(TrieNode *root, char paths[][PATH_SIZE], int *path_count);
+void merge_trees(TrieNode *dest_root, TrieNode *src_root);
 
 #endif

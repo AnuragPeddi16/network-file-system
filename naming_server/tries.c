@@ -57,24 +57,28 @@ void insert_path_trie(TrieNode *root, char *path) {
             current->first_child = child;
 
             free(path_component);
-            return;
+            return child;
 
         } else if (child == NULL) {
 
             fprintf(stderr, "Invalid file path: %s\n", path);
-            return;
+            return NULL;
 
         }
 
         free(path_component);
         current = child;
     }
+
+    return NULL;
 }
 
 // Function to search for a path in the Trie
-bool search_path_trie(TrieNode *root, char *path) {
+TrieNode* search_path_trie(TrieNode *root, char *path) {
     char path_copy[strlen(path) + 1];
     strcpy(path_copy, path);
+
+    if (path_copy[strlen(path_copy)-1] == '/') path_copy[strlen(path_copy)-1] = '\0';
 
     char *token = strtok(path_copy, "/");
     TrieNode *current = root;
@@ -82,11 +86,13 @@ bool search_path_trie(TrieNode *root, char *path) {
     while (token != NULL) {
         current = find_child(current, token);
         if (current == NULL) {
-            return 0; // Path not found
+            return NULL; // Path not found
         }
         token = strtok(NULL, "/");
     }
-    return current != NULL;
+
+    if (current) return current;
+    else return NULL;
 }
 
 // Recursive function to delete a node and its children
@@ -179,4 +185,34 @@ void store_all_paths_trie(TrieNode *root, char paths[][PATH_SIZE], int *path_cou
     char buffer[PATH_SIZE] = "";
     *path_count = 0;
     store_all_paths(root->first_child, buffer, 0, paths, path_count);
+}
+
+
+void merge_tries(TrieNode *dest_root, TrieNode *src_node, char *current_path) {
+    if (src_node == NULL) {
+        return;
+    }
+
+    // Construct the full path of the current node
+    char new_path[PATH_SIZE];
+    strcpy(new_path, current_path);
+    strcat(new_path, src_node->path_component);
+
+    if (!src_node->isFile) {
+        strcat(new_path, "/");
+    }
+
+    // Insert the current path into the destination trie
+    insert_path_trie(dest_root, new_path);
+
+    // Recurse on the first child
+    merge_tries(dest_root, src_node->first_child, new_path);
+
+    // Recurse on the next sibling
+    merge_tries(dest_root, src_node->next_sibling, current_path);
+}
+
+void merge_trees(TrieNode *dest_root, TrieNode *src_root) {
+    char initial_path[PATH_SIZE] = "";
+    merge_tries(dest_root, src_root->first_child, initial_path);
 }

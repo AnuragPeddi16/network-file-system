@@ -158,7 +158,15 @@ void handle_write_request(int client_fd, char *remaining_command) {
 
         }
 
+        ack = ntohl(ack);
+
     } else ack = SS_DOWN;
+
+    char message[BUFFER_SIZE];
+    sprintf(message, "Received ack with status %d\n\n", ack);
+    log_message(message);
+
+    ack = htonl(ack);
 
     if (send(client_fd, &ack, sizeof(ack), 0) < 0) {
 
@@ -234,6 +242,10 @@ void handle_create_request(int client_fd, char* request, char *path) {
 
     status = ntohl(status);
 
+    char message[BUFFER_SIZE];
+    sprintf(message, "Received ack with status %d\n\n", status);
+    log_message(message);
+
     if (status == ACK) insert_path_trie(ss->paths_root, file_path);
     free(file_path);
 
@@ -275,6 +287,10 @@ void handle_delete_request(int client_fd, char* request, char *path) {
 
     status = ntohl(status);
 
+    char message[BUFFER_SIZE];
+    sprintf(message, "Received ack with status %d\n\n", status);
+    log_message(message);
+
     if (status == ACK) delete_path_trie(ss->paths_root, file_path);
 
     status = htonl(status);
@@ -285,8 +301,6 @@ void handle_delete_request(int client_fd, char* request, char *path) {
 
 // Function to handle copy requests between storage servers via the naming server
 void handle_copy_request(int client_fd, char *paths) {
-
-    //TODO: copy folder, add accessible paths
 
     bool isFile = false;
 
@@ -299,7 +313,7 @@ void handle_copy_request(int client_fd, char *paths) {
     } else file_path = paths + 7;
 
     // Parse paths to extract source and destination paths
-    char *source_path = strtok(paths, " ");
+    char *source_path = strtok(file_path, " ");
     char *destination_path = strtok(NULL, " ");
 
     if (source_path == NULL || destination_path == NULL) {
@@ -357,6 +371,10 @@ void handle_copy_request(int client_fd, char *paths) {
 
     status = ntohl(status);
 
+    char message[BUFFER_SIZE];
+    sprintf(message, "Received ack with status %d\n\n", status);
+    log_message(message);
+
     if (status != OK) {
 
         status = htonl(status);
@@ -366,6 +384,13 @@ void handle_copy_request(int client_fd, char *paths) {
     }
 
     insert_path_trie(destination_ss->paths_root, destination_path);
+    if (!isFile) {
+        
+        TrieNode* source_node = search_path_trie(source_ss->paths_root, source_path);
+        TrieNode* dest_node = search_path_trie(destination_ss->paths_root, destination_path);
+        merge_trees(dest_node, source_node);
+
+    }
 
     int bytes_received;
 
@@ -418,6 +443,14 @@ void handle_copy_request(int client_fd, char *paths) {
 
     close(source_ss_fd);
     close(dest_ss_fd);
+
+    status = ntohl(status);
+
+    char message[BUFFER_SIZE];
+    sprintf(message, "Received ack with status %d\n\n", status);
+    log_message(message);
+
+    status = htonl(status);
 
     // Send acknowledgment back to the client
     if (send(client_fd, &status, sizeof(status), 0) < 0) {
