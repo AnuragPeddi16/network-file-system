@@ -84,7 +84,7 @@ void *accept_ss_connections(void *args) {
     struct sockaddr_in server_addr;
 
     // Create a socket
-    if ((nm_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    if ((nm_fd = socket(AF_INET, SOCK_STREAM, SO_REUSEADDR)) == 0) {
 
         print_error("Socket creation failed");
         exit(EXIT_FAILURE);
@@ -163,7 +163,7 @@ void *accept_client_connections(void *args) {
     struct sockaddr_in server_addr;
 
     // Create a socket
-    if ((nm_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    if ((nm_fd = socket(AF_INET, SOCK_STREAM, SO_REUSEADDR)) == 0) {
 
         print_error("Socket creation failed");
         exit(EXIT_FAILURE);

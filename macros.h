@@ -6,6 +6,7 @@
 #define ACK 1
 #define NOT_FOUND 2
 #define FAILED 3
+#define ASYNCHRONOUS_COMPLETE 4
 
 /* COLORS */
 

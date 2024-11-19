@@ -20,6 +20,8 @@ void send_ss_to_client(StorageServer* ss, int client_fd) {
     if (send(client_fd, response, sizeof(ClientResponse), 0) < 0) {
 
         print_error("Error sending response to client");
+        free(response);
+        return;
 
     }
 
