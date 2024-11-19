@@ -302,8 +302,6 @@ void handle_delete_request(int client_fd, char* request, char *path) {
 // Function to handle copy requests between storage servers via the naming server
 void handle_copy_request(int client_fd, char *paths) {
 
-    //TODO: copy folder, add accessible paths
-
     bool isFile = false;
 
     char* file_path;
@@ -386,7 +384,13 @@ void handle_copy_request(int client_fd, char *paths) {
     }
 
     insert_path_trie(destination_ss->paths_root, destination_path);
-    // todo: recursively add to paths
+    if (!isFile) {
+        
+        TrieNode* source_node = search_path_trie(source_ss->paths_root, source_path);
+        TrieNode* dest_node = search_path_trie(destination_ss->paths_root, destination_path);
+        merge_trees(dest_node, source_node);
+
+    }
 
     int bytes_received;
 
