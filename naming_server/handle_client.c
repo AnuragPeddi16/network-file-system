@@ -397,19 +397,19 @@ void handle_copy_request(int client_fd, char *paths) {
     if (isFile) {
 
         // Loop to read from the source and write to the destination
-        char data_buffer[BUFFER_SIZE];
-        while ((bytes_received = recv(source_ss_fd, data_buffer, sizeof(data_buffer), 0)) > 0) {
+        char data_buffer[MAX_FILE_SIZE];
+        bytes_received = recv(source_ss_fd, data_buffer, sizeof(data_buffer), 0); 
 
-            char* ptr;
-            if ((ptr = strstr(data_buffer, "STOP")) != NULL) *ptr = '\0';
+        char* ptr;
+        if ((ptr = strstr(data_buffer, "STOP")) != NULL) *ptr = '\0';
 
-            // Send a write request to the destination storage server
-            char write_request[BUFFER_SIZE+PATH_SIZE+100];
-            snprintf(write_request, BUFFER_SIZE+PATH_SIZE+100, "WRITE %s \"%s\"", destination_path, data_buffer);
-            close(dest_ss_fd);
-            dest_ss_fd = send_req_to_ss(destination_ss, write_request);
+        // Send a write request to the destination storage server
+        char write_request[MAX_FILE_SIZE+PATH_SIZE+100];
+        snprintf(write_request, MAX_FILE_SIZE+PATH_SIZE+100, "WRITE %s \"%s\"", destination_path, data_buffer);
+        close(dest_ss_fd);
+        dest_ss_fd = send_req_to_ss(destination_ss, write_request);
 
-        }
+        
 
     } else {
 
