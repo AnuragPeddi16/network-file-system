@@ -31,7 +31,7 @@ void parse_paths(char* paths_arg) {
     
     while (path_token && config.num_paths < MAX_ACCESSIBLE_PATHS) {
         // Trim whitespaces
-        char* trimmed_path = trim_whitespace(path_token);
+        char* trimmed_path=trim_whitespace(path_token);
         
         // Skip empty paths
         if (strlen(trimmed_path) == 0) {
@@ -40,7 +40,11 @@ void parse_paths(char* paths_arg) {
         }
 
         // Validate path
-        if (access(trimmed_path, F_OK) != 0) { // Check if path exists Relative Path too!
+        char* check_path=malloc(sizeof(trimmed_path)+4);
+        strcpy(check_path,"./");
+        strcat(check_path,trimmed_path);
+
+        if (access(check_path, F_OK) != 0) { // Check if path exists Relative Path too!
             char* message;
             asprintf(&message, "Error: Path '%s' does not exist", trimmed_path);
             log_message(message);

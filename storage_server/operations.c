@@ -1,7 +1,19 @@
 #include "operations.h"
 
 // Enhanced write request handler with file-level locking
-int handle_client_write_request(const char* path, const char* data) {
+int handle_client_write_request(const char* upath, const char* data) {
+    char* path=malloc(sizeof(upath)+4);
+    strcpy(path,"./");
+    strcat(path,upath);
+
+    int sync=0;
+    const char *substring = "SYNC";
+    if (strstr(path, substring) != NULL) {
+        sync=1;
+        strtok(path, "-");
+        log_message("SYNC Write Request");
+    }
+
     // Get file-specific lock
     FileLock* file_lock = get_file_lock(path);
     if (!file_lock) {
@@ -10,7 +22,7 @@ int handle_client_write_request(const char* path, const char* data) {
     }
 
     // Acquire lock for this specific file
-    // pthread_mutex_lock(&file_lock->mutex);
+    pthread_mutex_lock(&file_lock->mutex);
 
     size_t data_size = strlen(data);
     
@@ -30,7 +42,7 @@ int handle_client_write_request(const char* path, const char* data) {
     int write_result = 0;
 
     // Choose writing strategy based on data size
-    if (data_size > SYNC_THRESHOLD) {
+    if (data_size > SYNC_THRESHOLD && sync==0) {
         // Segmented writing for large data
         size_t written = 0;
         while (written < data_size) {
@@ -46,6 +58,7 @@ int handle_client_write_request(const char* path, const char* data) {
                 write_result = -1;
                 break;
             }
+            fflush(file);
             written += segment_written;
             usleep(10000);  // 10 milliseconds
         }
@@ -67,7 +80,7 @@ int handle_client_write_request(const char* path, const char* data) {
     fclose(file);
 
     // Release file-specific lock
-    // pthread_mutex_unlock(&file_lock->mutex);
+    pthread_mutex_unlock(&file_lock->mutex);
     release_file_lock(file_lock);
 
     if (write_result == 0) {
@@ -80,7 +93,11 @@ int handle_client_write_request(const char* path, const char* data) {
 }
 
 // Enhanced read request handler with file-level locking
-int handle_client_read_request(const char* path, int client_socket) {
+int handle_client_read_request(const char* upath, int client_socket) {
+    char* path=malloc(sizeof(upath)+4);
+    strcpy(path,"./");
+    strcat(path,upath);
+
     char buffer[BUFFER_SIZE];
     FILE* file = fopen(path, "r");
     
@@ -106,7 +123,7 @@ int handle_client_create_request(const char* path) {
     char path_copy[MAX_PATH_LENGTH];
     strncpy(path_copy, path, sizeof(path_copy) - 1);
     path_copy[sizeof(path_copy) - 1] = '\0';
-
+ 
     // Tokenize to type
     char* type = strtok(path_copy, " ");
 
@@ -115,9 +132,13 @@ int handle_client_create_request(const char* path) {
     snprintf(log_msg, sizeof(log_msg), "Create Request:%s Path=%s",type,path);
     log_message(log_msg);
 
-    if (strcmp(type, "FILE") == 0) {
-        char* actual_path = strtok(NULL, " ");
-        
+    //Tokenise path
+    char* upath = strtok(NULL, " ");
+    char* actual_path=malloc(sizeof(upath)+4);
+    strcpy(actual_path,"./");
+    strcat(actual_path,upath);
+
+    if (strcmp(type, "FILE") == 0) { 
         //Add to config accessible paths
         config.num_paths++;
         strcpy(config.accessible_paths[config.num_paths],actual_path);
@@ -134,7 +155,6 @@ int handle_client_create_request(const char* path) {
         return 0;
     }
     else if (strcmp(type, "FOLDER") == 0) {
-        char* actual_path = strtok(NULL, " ");
         config.num_paths++;
         strcpy(config.accessible_paths[config.num_paths],actual_path);
         // Create directory with 0755 permissions
@@ -166,7 +186,12 @@ int handle_client_delete_request(const char* path) {
     snprintf(log_msg, sizeof(log_msg), "Delete Request:%s Path=%s",type,path);
     log_message(log_msg);
 
-    char* actual_path = strtok(NULL, " ");
+    //Tokenise path
+    char* upath=strtok(NULL, " ");
+    char* actual_path=malloc(sizeof(upath)+4);
+    strcpy(actual_path,"./");
+    strcat(actual_path,upath);
+
     for(int i=0;i<config.num_paths;i++){
         if(strcmp(config.accessible_paths[i],actual_path)==0){
             for(int j=i;j<config.num_paths-1;j++){
@@ -210,8 +235,14 @@ int handle_client_delete_request(const char* path) {
 }
 
 // Handle INFO request
-int handle_client_info_request(const char* path, char* info_buffer) {
+int handle_client_info_request(const char* upath, char* info_buffer) {
     struct stat file_stat;
+
+    //Tokenise path
+    char* path=malloc(sizeof(upath)+4);
+    strcpy(path,"./");
+    strcat(path,upath);
+
     if (stat(path, &file_stat) != 0) {
         return -1; // File not found
     }
@@ -224,7 +255,12 @@ int handle_client_info_request(const char* path, char* info_buffer) {
 }
 
 // Handle STREAM request
-int handle_client_stream_request(const char* path, int client_socket) {
+int handle_client_stream_request(const char* upath, int client_socket) {
+    //Tokenise path
+    char* path=malloc(sizeof(upath)+4);
+    strcpy(path,"./");
+    strcat(path,upath);
+
     FILE* audio_file = fopen(path, "rb");
     if (!audio_file) {
         send(client_socket, "ERROR: Unable to open audio file", 34, 0);
@@ -442,8 +478,14 @@ void* handle_client_request(void* client_socket_ptr) {
             // Get data size
             size_t data_size = strlen(data);
             
+            int sync=0;
+            const char *substring = "SYNC";
+            if (strstr(path, substring) != NULL) {
+                sync=1;
+            }
+
             //Write data to file
-            if (data_size >= SYNC_THRESHOLD) {              // Asynchronous Write
+            if (data_size >= SYNC_THRESHOLD && sync==0) {              // Asynchronous Write
                 send(client_sock, ACK, strlen(ACK), 0);
                 if (handle_client_write_request(path, data) != 0) {
                     send(sock, "ASYNC FAILED", strlen("ASYNC FAILED"), 0); // Send FAILED to Naming Server
