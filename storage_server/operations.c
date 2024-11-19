@@ -191,14 +191,15 @@ int handle_client_create_request(const char* path) {
 }
 
 // Handle DELETE request
-int handle_client_delete_request(const char* path) {
-    printf("He is here\n");
+int handle_client_delete_request(const char* type, const char* path) {
     // If you want to tokenize `path` further
-    char path_copy[MAX_PATH_LENGTH];
-    strncpy(path_copy, path, sizeof(path_copy));
+    // char path_copy[MAX_PATH_LENGTH];
+    // strcpy(path_copy, upath);
+    // printf("%s",path_copy);
 
     // Tokenize to type
-    char* type = strtok(path_copy, " ");
+    // char* type = strtok(path_copy, " ");
+    // char* path=strtok(NULL, "");
 
     // Log the Create attempt
     char log_msg[256];
@@ -206,10 +207,10 @@ int handle_client_delete_request(const char* path) {
     log_message(log_msg);
 
     //Tokenise path
-    char* upath=strtok(NULL, " ");
-    char* actual_path=malloc(sizeof(upath)+4);
+    
+    char* actual_path=malloc(sizeof(path)+4);
     strcpy(actual_path,"./");
-    strcat(actual_path,upath);
+    strcat(actual_path,path);
     
     pthread_mutex_lock(&file_locks_mutex);
     pthread_mutex_lock(&config.config_mutex);
@@ -621,14 +622,13 @@ void* handle_client_request(void* client_socket_ptr) {
             return NULL;
         }
         // while(1){
-            pthread_mutex_lock(&lock->mutex);
+        pthread_mutex_lock(&lock->mutex);
         //     if(lock->ref_count==0){
         //         break;
         //     }
             // pthread_mutex_unlock(&lock->mutex);
         // }
-        printf("He is here\n");
-        if (handle_client_delete_request(path) == 0) {
+        if (handle_client_delete_request(path,upath) == 0) {
             int ack = htonl(ACK);
             send(client_sock,&ack,sizeof(ack), 0);
             log_message("Delete Success");

@@ -544,3 +544,93 @@
 ] SUCCESS: Storage Server running on port Client_port 48631
 [Wed Nov 20 03:34:32 2024
 ] Create Request:FILE Path=FILE
+[Wed Nov 20 03:37:31 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:37:31 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:37:31 2024
+] SUCCESS: Storage Server running on port Client_port 32787
+[Wed Nov 20 03:41:52 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:41:52 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:41:52 2024
+] SUCCESS: Storage Server running on port Client_port 60763
+[Wed Nov 20 03:42:13 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:42:13 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:42:13 2024
+] SUCCESS: Storage Server running on port Client_port 51411
+[Wed Nov 20 03:52:23 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:52:23 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:52:23 2024
+] SUCCESS: Storage Server running on port Client_port 38377
+[Wed Nov 20 03:55:41 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:55:41 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:55:41 2024
+] SUCCESS: Storage Server running on port Client_port 41595
+[Wed Nov 20 03:56:41 2024
+] Read Request: Path=./a/try.c
+[Wed Nov 20 03:56:41 2024
+] READ SUCCESS
+[Wed Nov 20 03:58:51 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:58:51 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:58:51 2024
+] SUCCESS: Storage Server running on port Client_port 45443
+[Wed Nov 20 03:59:14 2024
+] Delete Request:FILE Path=FILE
+[Wed Nov 20 04:01:04 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:01:04 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:01:04 2024
+] SUCCESS: Storage Server running on port Client_port 42901
+[Wed Nov 20 04:01:59 2024
+] Delete Request:FILE Path=(null)
+[Wed Nov 20 04:01:59 2024
+] Delete Success
+[Wed Nov 20 04:03:16 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:03:16 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:03:16 2024
+] SUCCESS: Storage Server running on port Client_port 33301
+[Wed Nov 20 04:03:29 2024
+] Delete Request:FILE Path=(null)
+[Wed Nov 20 04:03:29 2024
+] Delete Success
+[Wed Nov 20 04:05:43 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:05:43 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:05:43 2024
+] SUCCESS: Storage Server running on port Client_port 40523
+[Wed Nov 20 04:05:55 2024
+] Delete Request:FILE Path=(null)
+[Wed Nov 20 04:09:47 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 04:09:47 2024
+] SUCCESS:Registration
+[Wed Nov 20 04:09:47 2024
+] SUCCESS: Storage Server running on port Client_port 55725
+[Wed Nov 20 04:09:58 2024
+] Delete Request:FILE Path=a/try.c
+[Wed Nov 20 04:09:58 2024
+] ERROR: Unable to Delete file

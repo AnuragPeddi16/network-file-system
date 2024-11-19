@@ -170,7 +170,7 @@ void execute_command(int argc, char** args) {
         }
     }
     else if (strcmp(cmd, "COPY") == 0) {
-        if (argc != 3) {
+        if (argc != 4) {
             printf("Usage: COPY <file/folder> <source> <dest>\n");
             
             return;
