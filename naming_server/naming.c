@@ -70,7 +70,10 @@ bool add_storage_server(int fd, const char *ip, int nm_port, int client_port, ch
     tokenise_and_store(storage_servers[server_count].paths_root, paths);
 
     server_count++;
-    printf("Storage server added: IP %s, Port %d\n", ip, nm_port);
+
+    char message[BUFFER_SIZE];
+    sprintf(message, "Storage server added: IP %s, Port %d\n\n", ip, nm_port);
+    log_message(message);
 
     pthread_mutex_unlock(&server_mutex);
     return true;
@@ -120,7 +123,10 @@ void *accept_ss_connections(void *args) {
 
     char ip[INET_ADDRSTRLEN];
     get_local_ipv4_address(ip, INET_ADDRSTRLEN);
-    printf("Naming server listening for storage servers on " YELLOW("port %d") " at " YELLOW("ip %s\n"), SS_PORT, ip);
+
+    char message[BUFFER_SIZE];
+    sprintf(message, "Naming server listening for storage servers on " "port %d" " at " "ip %s\n\n", SS_PORT, ip);
+    log_message(message);
 
     printf(GREEN("Thread started:") " Waiting for incoming storage server connections...\n\n");
 
@@ -138,7 +144,7 @@ void *accept_ss_connections(void *args) {
 
         }
 
-        printf("Received server connection...\n");
+        log_message("Received server connection...\n");
 
         // Receive data from the storage server
         char buffer[PATH_SIZE*MAX_PATHS_PER_SERVER] = {0};
@@ -212,7 +218,10 @@ void *accept_client_connections(void *args) {
 
     char ip[INET_ADDRSTRLEN];
     get_local_ipv4_address(ip, INET_ADDRSTRLEN);
-    printf("Naming server listening for clients on " YELLOW("port %d") " at " YELLOW("ip %s\n"), CLIENT_PORT, ip);
+
+    char message[BUFFER_SIZE];
+    sprintf(message, "Naming server listening for clients on " "port %d" " at " "ip %s\n\n", CLIENT_PORT, ip);
+    log_message(message);
 
     printf(GREEN("Thread started:") " Waiting for incoming client connections...\n\n");
 
@@ -230,7 +239,10 @@ void *accept_client_connections(void *args) {
 
         }
 
-        printf("Accepted client connection %d\n", client_fd);
+
+        char message[BUFFER_SIZE];
+        sprintf(message, "Accepted client connection %d\n", client_fd);
+        log_message(message);
 
         pthread_t client_thread;
         pthread_create(&client_thread, NULL, client_handler, (void*)&client_fd);
@@ -257,9 +269,14 @@ int main() {
     signal(SIGPIPE, SIG_IGN);
 
     pthread_mutex_init(&server_mutex, NULL);
+
+    init_log();
     cache_init();
+
     start_naming_server();
+    
     cache_cleanup();
+
     pthread_mutex_destroy(&server_mutex);
 
     return 0;

@@ -25,8 +25,20 @@ void send_ss_to_client(StorageServer* ss, int client_fd) {
 
     }
 
-    if (ss) printf("Sent response to client: IP %s and port %d with status %d\n", response->server_ip, response->server_port, response->status);
-    else printf("Sent response to client: Status %d\n", response->status);
+    char message[BUFFER_SIZE];
+
+    if (ss) {
+
+        sprintf(message, "Sent response to client %d: IP %s and port %d with status %d\n", client_fd, response->server_ip, response->server_port, response->status);
+        log_message(message);
+
+    }
+    else {
+
+        sprintf(message, "Sent response to client %d: Status %d\n", client_fd, response->status);
+        log_message(message);
+
+    }
 
     free(response);
 
@@ -150,8 +162,12 @@ void handle_create_request(int client_fd, char* request, char *path) {
 
     }
 
-    insert_path_trie(ss->paths_root, file_path);
+    status = ntohl(status);
+
+    if (status == ACK) insert_path_trie(ss->paths_root, file_path);
     free(file_path);
+
+    status = htonl(status);
 
     if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending acknowledgment to client");
 
@@ -185,7 +201,11 @@ void handle_delete_request(int client_fd, char* request, char *path) {
 
     }
 
-    delete_path_trie(ss->paths_root, file_path);
+    status = ntohl(status);
+
+    if (status == ACK) delete_path_trie(ss->paths_root, file_path);
+
+    status = htonl(status);
 
     if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending acknowledgment to client");
 
@@ -251,6 +271,8 @@ void handle_copy_request(int client_fd, char *paths) {
         return;
 
     }
+
+    status = ntohl(status);
 
     if (status != OK) {
 
@@ -359,7 +381,9 @@ void *client_handler(void *client_sock_fd) {
     }
     buffer[bytes_read-1] = '\0';
 
-    printf("Received request from client: %s\n", buffer);
+    char message[BUFFER_SIZE+100];
+    sprintf(message, "Received request from client: %s\n\n", buffer);
+    log_message(message);
 
     /*
     
@@ -397,7 +421,8 @@ void *client_handler(void *client_sock_fd) {
         if (send(client_fd, "Unknown command", strlen("Unknown command"), 0) < 0) print_error("sending invalid command error failed");
     }
 
-    printf("Client connection %d closed.\n", client_fd);
+    sprintf(message, "Client connection %d closed.\n\n", client_fd);
+    log_message(message);
 
     close(client_fd);
     return NULL;

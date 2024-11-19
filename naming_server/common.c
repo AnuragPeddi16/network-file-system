@@ -5,6 +5,7 @@ void print_error(char* message) {
     char* str = (char*) malloc(sizeof(char)*(strlen(message)+50));
     sprintf(str, RED("%s"), message);
     perror(str);
+    log_message(message);
 
     free(str);
 

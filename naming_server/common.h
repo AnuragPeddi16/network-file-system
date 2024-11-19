@@ -18,6 +18,7 @@
 
 #include "../macros.h"
 #include "tries.h"
+#include "log.h"
 
 #define MAX_SERVERS 50
 #define MAX_CLIENTS 50
