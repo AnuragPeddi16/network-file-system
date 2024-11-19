@@ -41,8 +41,8 @@ void parse_paths(char* paths_arg) {
 
         // Validate path
         if (access(trimmed_path, F_OK) != 0) { // Check if path exists Relative Path too!
-            char* message;
-            asprintf(&message, "Error: Path '%s' does not exist", trimmed_path);
+            char message[BUFFER_SIZE];
+            sprintf(message, "Error: Path '%s' does not exist", trimmed_path);
             log_message(message);
             path_token = strtok(NULL, ",");
             continue;
@@ -54,8 +54,8 @@ void parse_paths(char* paths_arg) {
         // Get next path
         path_token = strtok(NULL, ",");
     }
-    char* message;
-    asprintf(&message, "SUCCESS: Discovered %d paths:\n", config.num_paths);
+    char message[BUFFER_SIZE];
+    sprintf(message, "SUCCESS: Discovered %d paths:\n", config.num_paths);
     log_message(message);
 }
 

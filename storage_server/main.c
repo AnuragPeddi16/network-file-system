@@ -84,8 +84,8 @@ int main(int argc, char *argv[]) {
     }
 
     listen(server_sock, MAX_CLIENTS);
-    char * message;
-    asprintf(&message, "SUCCESS: Storage Server running on port Client_port %d", config.ss_client_port);
+    char message[BUFFER_SIZE];
+    sprintf(message, "SUCCESS: Storage Server running on port Client_port %d", config.ss_client_port);
     log_message(message);
 
     // Accept client connections and handle requests

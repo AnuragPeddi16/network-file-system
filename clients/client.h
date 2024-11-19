@@ -9,6 +9,8 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#include "../macros.h"
+
 #define BUFFER_SIZE 1024
 #define MAX_PATH_LENGTH 256
 #define NAMING_SERVER_PORT 8051  // Example port
@@ -30,6 +32,14 @@ typedef struct ServerInfo {
     char ip[INET_ADDRSTRLEN];
     int port;
 } ServerInfo;
+
+typedef struct {
+
+    int status;
+    char server_ip[INET_ADDRSTRLEN];
+    int server_port;
+
+} ClientResponse;
 
 // Function declarations
 int connect_to_server(const char* ip, int port);
