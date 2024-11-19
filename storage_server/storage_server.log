@@ -449,3 +449,98 @@
 ] SUCCESS:Registration
 [Wed Nov 20 02:33:21 2024
 ] SUCCESS: Storage Server running on port Client_port 37275
+[Wed Nov 20 03:08:26 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:08:26 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:08:26 2024
+] SUCCESS: Storage Server running on port Client_port 53897
+[Wed Nov 20 03:09:44 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:09:44 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:09:44 2024
+] SUCCESS: Storage Server running on port Client_port 38907
+[Wed Nov 20 03:11:47 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:11:47 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:11:47 2024
+] SUCCESS: Storage Server running on port Client_port 57221
+[Wed Nov 20 03:15:53 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:15:53 2024
+] Registration connection failed
+[Wed Nov 20 03:15:53 2024
+] SUCCESS: Storage Server running on port Client_port 57095
+[Wed Nov 20 03:16:17 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:16:17 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:16:17 2024
+] SUCCESS: Storage Server running on port Client_port 52775
+[Wed Nov 20 03:20:09 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:20:09 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:20:09 2024
+] SUCCESS: Storage Server running on port Client_port 40829
+[Wed Nov 20 03:21:54 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:21:54 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:21:54 2024
+] SUCCESS: Storage Server running on port Client_port 47759
+[Wed Nov 20 03:23:39 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:23:39 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:23:39 2024
+] SUCCESS: Storage Server running on port Client_port 60021
+[Wed Nov 20 03:26:00 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:26:00 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:26:00 2024
+] SUCCESS: Storage Server running on port Client_port 52591
+[Wed Nov 20 03:27:05 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:27:05 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:27:05 2024
+] SUCCESS: Storage Server running on port Client_port 44689
+[Wed Nov 20 03:28:15 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:28:15 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:28:15 2024
+] SUCCESS: Storage Server running on port Client_port 55899
+[Wed Nov 20 03:28:20 2024
+] Delete Request:FILE Path=FILE
+[Wed Nov 20 03:29:16 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:29:16 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:29:16 2024
+] SUCCESS: Storage Server running on port Client_port 36521
+[Wed Nov 20 03:34:09 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 03:34:09 2024
+] SUCCESS:Registration
+[Wed Nov 20 03:34:09 2024
+] SUCCESS: Storage Server running on port Client_port 48631
+[Wed Nov 20 03:34:32 2024
+] Create Request:FILE Path=FILE

@@ -344,7 +344,7 @@ void handle_copy_request(int client_fd, char *paths) {
     char create_request[BUFFER_SIZE];
     if (isFile) snprintf(create_request, BUFFER_SIZE, "CREATE FILE %s", destination_path);
     else snprintf(create_request, BUFFER_SIZE, "CREATE FOLDER %s/", destination_path);
-    int dest_ss_fd = send_req_to_ss(destination_path, create_request);
+    int dest_ss_fd = send_req_to_ss(destination_ss, create_request);
 
     // Receive status from the destination storage server
     int status;
@@ -379,8 +379,8 @@ void handle_copy_request(int client_fd, char *paths) {
             if ((ptr = strstr(data_buffer, "STOP")) != NULL) *ptr = '\0';
 
             // Send a write request to the destination storage server
-            char write_request[BUFFER_SIZE];
-            snprintf(write_request, BUFFER_SIZE, "WRITE %s \"%s\"", destination_path, data_buffer);
+            char write_request[BUFFER_SIZE+PATH_SIZE+100];
+            snprintf(write_request, BUFFER_SIZE+PATH_SIZE+100, "WRITE %s \"%s\"", destination_path, data_buffer);
             close(dest_ss_fd);
             dest_ss_fd = send_req_to_ss(destination_ss, write_request);
 
@@ -399,7 +399,7 @@ void handle_copy_request(int client_fd, char *paths) {
 
         // Send a write request to the destination storage server
         char write_request[MAX_FILE_SIZE + PATH_SIZE + 100];
-        snprintf(write_request, BUFFER_SIZE, "UNZIP %s \"%s\"", destination_path, data_buffer);
+        snprintf(write_request, MAX_FILE_SIZE + PATH_SIZE + 100, "UNZIP %s \"%s\"", destination_path, data_buffer);
         close(dest_ss_fd);
         dest_ss_fd = send_req_to_ss(destination_ss, write_request);
 

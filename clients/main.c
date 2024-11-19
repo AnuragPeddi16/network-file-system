@@ -135,7 +135,7 @@ void execute_command(int argc, char** args) {
     }
     else if (strcmp(cmd, "CREATE") == 0) {
         if (argc != 3) {
-            printf("Usage: CREATE <path> <name>\n");
+            printf("Usage: CREATE <file/dir> <path>\n");
             return;
         }
         if (handle_create_operation(args[1], args[2]) == 0) {
@@ -143,11 +143,11 @@ void execute_command(int argc, char** args) {
         }
     }
     else if (strcmp(cmd, "DELETE") == 0) {
-        if (argc != 2) {
-            printf("Usage: DELETE <path>\n");
+        if (argc != 3) {
+            printf("Usage: DELETE <file/dir> <path>\n");
             return;
         }
-        if (handle_delete_operation(args[1]) == 0) {
+        if (handle_delete_operation(args[1],args[2]) == 0) {
             printf("Delete operation completed successfully.\n");
         }
     }
@@ -171,11 +171,11 @@ void execute_command(int argc, char** args) {
     }
     else if (strcmp(cmd, "COPY") == 0) {
         if (argc != 3) {
-            printf("Usage: COPY <source> <dest>\n");
+            printf("Usage: COPY <file/folder> <source> <dest>\n");
             
             return;
         }
-        if (handle_copy_operation(args[1], args[2]) == 0) {
+        if (handle_copy_operation(args[1], args[2], args[3]) == 0) {
             printf("Copy operation completed successfully.\n");
         }
     }

@@ -48,9 +48,9 @@ int handle_read_operation(const char* path);
 int handle_write_operation(const char* path, const char* content);
 int handle_create_operation(const char* path, const char* name);
 int handle_info_operation(const char *path);
-int handle_delete_operation(const char* path);
+int handle_delete_operation(const char * dir, const char* path);
 int handle_list_operation();
 int handle_stream_operation(const char* path);
-int handle_copy_operation(const char* source, const char* dest);
+int handle_copy_operation(const char* dir,const char* source, const char* dest);
 
 #endif

@@ -1,18 +1,12 @@
-[20-11-2024 02:32:47] Naming server listening for storage servers on port 8050 at ip 10.1.131.145
+[20-11-2024 03:34:06] Naming server listening for clients on port 8051 at ip 10.1.131.145
 
-[20-11-2024 02:32:47] Naming server listening for clients on port 8051 at ip 10.1.131.145
+[20-11-2024 03:34:06] Naming server listening for storage servers on port 8050 at ip 10.1.131.145
 
-[20-11-2024 02:33:21] Received server connection...
-[20-11-2024 02:33:21] Storage server added: IP 127.0.0.1, Port 37938
+[20-11-2024 03:34:09] Received server connection...
+[20-11-2024 03:34:09] Storage server added: IP 127.0.0.1, Port 56468
 
-[20-11-2024 02:33:44] Accepted client connection 6
-[20-11-2024 02:33:44] Received request from client: LIST
+[20-11-2024 03:34:32] Accepted client connection 4
+[20-11-2024 03:34:32] Received request from client: CREATE FILE b/new.txt
 
-[20-11-2024 02:33:44] Client connection 6 closed.
-
-[20-11-2024 02:34:03] Accepted client connection 8
-[20-11-2024 02:34:03] Received request from client: STREAM b/coldplay.mp3
-
-[20-11-2024 02:34:03] Sent response to client 8: IP 127.0.0.1 and port 37275 with status 0
-[20-11-2024 02:34:03] Client connection 8 closed.
+[20-11-2024 03:34:33] Client connection 4 closed.
 

@@ -198,7 +198,6 @@ int handle_write_operation(const char *path, const char *content)
         return -1;
 
     ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_WRITE,NULL);
-    close(naming_server_fd);
 
     // if (storage_server.port == 0)
     // {
@@ -238,8 +237,61 @@ int handle_write_operation(const char *path, const char *content)
     send(storage_fd, request, strlen(request), 0);
 
     // Wait for acknowledgment
-    char response[BUFFER_SIZE] = {0};
-    recv(storage_fd, response, sizeof(response) - 1, 0);
+    int response = 0; //init response
+    recv(storage_fd, &response, sizeof(response), 0);
+    if (response == ASYNCHRONOUS_COMPLETE)
+    {
+        //KEEP THE PORT OPEN FOR NS
+        printf("Write operation completed asynchronously\n");
+    }
+    else
+    {
+        switch (response)
+        {
+        case ACK:
+            printf(GREEN("Write operation completed successfully\n"));
+            break;
+        case FAILED:
+            printf(RED("Write operation failed\n"));
+            break;
+        default:
+            printf("Unknown response\n");
+            break;
+        }
+
+        // Close connection
+        close(naming_server_fd);
+        return 0;
+    }
+
+    recv(naming_server_fd, &response, sizeof(response), 0);
+    {
+        switch (response)
+        {
+        case FAILED:
+            printf(RED("Write operation failed\n"));
+            break;
+        case ASYNCHRONOUS_COMPLETE:
+            printf(CYAN("Write operation completed asynchronously\n"));
+            break;
+        case SS_DOWN:
+            printf(MAGENTA("Storage server is down\n"));
+            break;
+        default:
+            printf("Unknown response\n");
+            break;
+        }
+
+        // Close connection
+        close(naming_server_fd);
+    }
+
+
+
+
+    
+    
+    
 
     close(storage_fd);
     return 0;
@@ -359,14 +411,14 @@ int handle_info_operation(const char *path)
 
 
 //talk only to ns
-int handle_create_operation(const char *path, const char *name)
+int handle_create_operation(const char *dir, const char *path)
 {
     int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
     char request[BUFFER_SIZE];
-    snprintf(request, sizeof(request), "CREATE %s\n", path);
+    snprintf(request, sizeof(request), "CREATE %s %s\n", dir, path);
     send(naming_server_fd, request, strlen(request), 0);
 
     // Wait for acknowledgment
@@ -416,14 +468,14 @@ int handle_create_operation(const char *path, const char *name)
     return 0;
 }
 
-int handle_delete_operation(const char *path)
+int handle_delete_operation(const char *dir, const char *path)
 {
     int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
     char request[BUFFER_SIZE];
-    snprintf(request, sizeof(request), "DELETE %s\n", path);
+    snprintf(request, sizeof(request), "DELETE %s %s\n", dir, path);
     send(naming_server_fd, request, strlen(request), 0);
 
     // Wait for acknowledgment
@@ -553,14 +605,14 @@ int handle_list_operation()
     return 0;
 }
 
-int handle_copy_operation(const char *source, const char *dest)
+int handle_copy_operation(const char* dir, const char *source, const char *dest)
 {
     int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
     char request[BUFFER_SIZE];
-    snprintf(request, sizeof(request), "COPY %s %s\n", source, dest);
+    snprintf(request, sizeof(request), "COPY %s %s %s\n", dir, source, dest);
     send(naming_server_fd, request, strlen(request), 0);
 
     // Wait for acknowledgment
