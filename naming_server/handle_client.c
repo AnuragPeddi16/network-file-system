@@ -71,17 +71,15 @@ void handle_read_request(int client_fd, char *file_path) {
 
 // Function to handle write requests
 void handle_write_request(int client_fd, char *remaining_command) {
-
-    bool sync = false;
-    if (strstr(remaining_command, "-SYNC") != NULL) sync = true;
     
     char* file_path = strtok(remaining_command, " ");
-    if (sync) file_path = strtok(NULL, " ");
     char* data = strtok(NULL, "");
 
     StorageServer* ss = cache_search_insert(file_path);
     send_ss_to_client(ss, client_fd);
 
+    bool sync = false;
+    if (strstr(data, "-SYNC") != NULL) sync = true;
     if (strlen(data) < ASYNC_LIMIT || sync) return;
 
     struct pollfd pfd;
@@ -321,6 +319,8 @@ void handle_copy_request(int client_fd, char *paths) {
         return;
 
     }
+
+    insert_path_trie(destination_ss->paths_root, destination_path);
 
     // Send a write request to the destination storage server
     char write_request[BUFFER_SIZE];
