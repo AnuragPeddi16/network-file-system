@@ -53,6 +53,24 @@ bool add_storage_server(int fd, const char *ip, int nm_port, int client_port, ch
 
     pthread_mutex_lock(&server_mutex);
 
+    for (int i = 0; i < server_count; i++) {
+
+        if (strncmp(storage_servers[i].ip, ip, INET_ADDRSTRLEN) == 0 && storage_servers[i].nm_port == nm_port) {
+
+            storage_servers[i].active = true;
+
+            char message[BUFFER_SIZE];
+            sprintf(message, "Storage server back online: IP %s, Port %d\n\n", ip, nm_port);
+            log_message(message);
+
+            pthread_mutex_unlock(&server_mutex);
+
+            return true;
+
+        }
+
+    }
+
     if (server_count >= MAX_SERVERS) {
 
         print_error("Max server limit reached.\n");
