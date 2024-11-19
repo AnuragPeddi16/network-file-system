@@ -41,9 +41,11 @@ void register_with_naming_server() {
     send(sock, message, strlen(message), 0);
     //I can add IP here, if required
 
-    char response[BUFFER_SIZE];
-    recv(sock, response, sizeof(response), 0); //Waiting for Acknowledgement
-    if(response[0] != '1'){
+    int response;
+    recv(sock, &response, sizeof(response), 0);
+    response = ntohl(response);
+
+    if(response != 1){
         log_message("FAILED:Registration");
         return;
     }

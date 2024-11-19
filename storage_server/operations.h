@@ -18,10 +18,11 @@
 #include "utils.h"
 
 // Status codes
-#define OK "0"
-#define ACK "1"
-#define NOT_FOUND "2"
-#define FAILED "3"
+#define OK 0
+#define ACK 1
+#define NOT_FOUND 2
+#define FAILED 3
+#define ASYNCHRONOUS_COMPLETE 4
 #define SYNC_THRESHOLD 4096  // 4KB
 #define SEGMENT_SIZE 1024    // 1KB chunks for async writing
 

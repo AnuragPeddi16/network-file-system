@@ -74,6 +74,7 @@ void log_message(const char* message) {
         fprintf(log_file, "[%s] %s\n", ctime(&now), message);
         fclose(log_file);
     }
+    printf("-> %s\n", message);
 }
 
 // Function to find a free port

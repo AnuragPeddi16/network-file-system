@@ -113,6 +113,8 @@ int handle_client_read_request(const char* upath, int client_socket) {
     while (fgets(buffer, sizeof(buffer), file)) {
         send(client_socket, buffer, strlen(buffer), 0);
     }
+    send(client_socket,"STOP",4, 0);
+
     fclose(file);
     log_message("READ SUCCESS");
     return 0;
@@ -138,11 +140,23 @@ int handle_client_create_request(const char* path) {
     strcpy(actual_path,"./");
     strcat(actual_path,upath);
 
+    //Add to Concurrent paths
+    pthread_mutex_lock(&file_locks_mutex);
+    pthread_mutex_lock(&config.config_mutex);
+
+    int i=config.num_paths+1;
+    pthread_mutex_init(&file_locks[i].mutex, NULL);
+    strcpy(file_locks[i].filename,upath);
+    file_locks[i].ref_count = 0;
+
+    pthread_mutex_unlock(&config.config_mutex);
+    pthread_mutex_unlock(&file_locks_mutex);
+
     if (strcmp(type, "FILE") == 0) { 
         //Add to config accessible paths
         pthread_mutex_lock(&config.config_mutex);
         config.num_paths++;
-        strcpy(config.accessible_paths[config.num_paths],actual_path);
+        strcpy(config.accessible_paths[config.num_paths],upath);
         pthread_mutex_unlock(&config.config_mutex);
 
         // Create an empty file (original implementation)
@@ -159,8 +173,9 @@ int handle_client_create_request(const char* path) {
     else if (strcmp(type, "FOLDER") == 0) {
         pthread_mutex_lock(&config.config_mutex);
         config.num_paths++;
-        strcpy(config.accessible_paths[config.num_paths],actual_path);
+        strcpy(config.accessible_paths[config.num_paths],upath);
         pthread_mutex_unlock(&config.config_mutex);
+
         // Create directory with 0755 permissions
         if (mkdir(actual_path, 0755) != 0) {
             log_message("ERROR: Unable to create folder");
@@ -196,17 +211,27 @@ int handle_client_delete_request(const char* path) {
     strcpy(actual_path,"./");
     strcat(actual_path,upath);
     
+    pthread_mutex_lock(&file_locks_mutex);
     pthread_mutex_lock(&config.config_mutex);
     for(int i=0;i<config.num_paths;i++){
         if(strcmp(config.accessible_paths[i],actual_path)==0){
             for(int j=i;j<config.num_paths-1;j++){
                 strcpy(config.accessible_paths[j],config.accessible_paths[j+1]);
+                
+                //Deleting/Removing lock and shifting others
+                pthread_mutex_lock(&file_locks[j].mutex);
+                pthread_mutex_lock(&file_locks[j+1].mutex);
+                strcpy(file_locks[j].filename,file_locks[j+1].filename);
+                file_locks[j].ref_count=file_locks[j+1].ref_count;
+                pthread_mutex_unlock(&file_locks[j+1].mutex);
+                pthread_mutex_lock(&file_locks[j+1].mutex);
             }
             config.num_paths--;
             break;
         }
     }
     pthread_mutex_unlock(&config.config_mutex);
+    pthread_mutex_unlock(&file_locks_mutex);
 
     //Check
     if (type == NULL || actual_path == NULL) {
@@ -269,7 +294,8 @@ int handle_client_stream_request(const char* upath, int client_socket) {
 
     FILE* audio_file = fopen(path, "rb");
     if (!audio_file) {
-        send(client_socket, "ERROR: Unable to open audio file", 34, 0);
+        int ack = htonl(FAILED);
+        send(client_socket,&ack,sizeof(ack), 0);
         return -1;
     }
 
@@ -290,8 +316,9 @@ int handle_client_list_request(int client_socket) {
         strcat(response, config.accessible_paths[i]);
         strcat(response, "\n");
     }
-    send(client_socket, response, strlen(response), 0);
     pthread_mutex_unlock(&config.config_mutex);
+    send(client_socket, response, strlen(response), 0);
+    
     return 0;
 }
 
@@ -308,7 +335,8 @@ int zip_path_and_send(const char* source_path) {
 
     // Validate source path[Not Doing]
     if (stat(source_path, &path_stat) != 0) {
-        send(sock, NOT_FOUND, sizeof(NOT_FOUND), 0);
+        int ack = htonl(NOT_FOUND);
+        send(sock,&ack,sizeof(ack), 0);
         return -1;
     }
 
@@ -320,21 +348,24 @@ int zip_path_and_send(const char* source_path) {
         // Zip single file
         snprintf(command, sizeof(command),"zip '%s' '%s' > /dev/null 2>&1",zip_path, source_path);
     } else {
-        send(sock, FAILED, sizeof(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(sock,&ack,sizeof(ack), 0);
         return -1;
     }
 
     // Execute zip command
     int zip_result = system(command);
     if (zip_result != 0) {
-        send(sock, FAILED, sizeof(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(sock,&ack,sizeof(ack), 0);
         return -1;
     }
 
     // Open the zip file
     FILE* zip_file = fopen(zip_path, "rb");
     if (!zip_file) {
-        send(sock, FAILED, sizeof(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(sock,&ack,sizeof(ack), 0);
         return -1;
     }
 
@@ -347,7 +378,8 @@ int zip_path_and_send(const char* source_path) {
     char* file_buffer = malloc(file_size);
     if (!file_buffer) {
         fclose(zip_file);
-        send(sock, FAILED, sizeof(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(sock,&ack,sizeof(ack), 0);
         return -1;
     }
 
@@ -357,7 +389,8 @@ int zip_path_and_send(const char* source_path) {
 
     if (read_size != file_size) {
         free(file_buffer);
-        send(sock, FAILED, sizeof(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(sock,&ack,sizeof(ack), 0);
         return -1;
     }
 
@@ -367,8 +400,9 @@ int zip_path_and_send(const char* source_path) {
     send(sock, size_buffer, strlen(size_buffer), 0);
 
     // Wait for client acknowledgment
-    char ack[10];
-    recv(sock, ack, sizeof(ack), 0);
+    int response;
+    recv(sock, &response, sizeof(response), 0);
+    response = ntohl(response);
 
     // Send file contents
     ssize_t sent_bytes = send(sock, file_buffer, file_size, 0);
@@ -392,7 +426,8 @@ int unzip_received_data(const char* input) {
 
     // Ensure destination directory exists
     if (mkdir(destination_path, 0755) != 0 && errno != EEXIST) {
-        send(sock, FAILED, strlen(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(sock,&ack,sizeof(ack), 0);
         return -1;
     }
 
@@ -403,7 +438,8 @@ int unzip_received_data(const char* input) {
      // Write received zip data to temporary file
     FILE* zip_file = fopen(zip_path, "wb");
     if (!zip_file) {
-        send(sock, FAILED, strlen(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(sock,&ack,sizeof(ack), 0);
         log_message("ERROR: Unable to create temporary zip file");
         return -1;
     }
@@ -413,7 +449,8 @@ int unzip_received_data(const char* input) {
     fclose(zip_file);
 
     if (written != data_size) {
-        send(sock, FAILED, strlen(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(sock,&ack,sizeof(ack), 0);
         log_message("ERROR: Unable to write zip data to temporary file");
         return -1;
     }
@@ -472,7 +509,9 @@ void* handle_client_request(void* client_socket_ptr) {
 
     // Handle different operations
     if (operation == NULL) {
-        send(client_sock, FAILED, strlen(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(client_sock,&ack,sizeof(ack), 0);
+        return NULL;
     } 
     else if (strcmp(operation, "READ") == 0) {
         FileLock* lock = get_file_lock(path);
@@ -484,12 +523,16 @@ void* handle_client_request(void* client_socket_ptr) {
         lock->ref_count++;
         release_file_lock(lock);
         
+        //Handling Acknowlegement
         if (handle_client_read_request(path, client_sock) == 0) {
-            send(client_sock, ACK, strlen(ACK), 0);
+            int ack = htonl(ACK);
+            send(client_sock,&ack,sizeof(ack), 0);
         } 
         else {
-            send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
+            int ack = htonl(NOT_FOUND);
+            send(client_sock,&ack,sizeof(ack), 0);
         }
+
         pthread_mutex_lock(&lock->mutex);
         lock->ref_count--;
         release_file_lock(lock);
@@ -517,31 +560,38 @@ void* handle_client_request(void* client_socket_ptr) {
 
             //Write data to file
             if (data_size >= SYNC_THRESHOLD && sync==0) {              // Asynchronous Write
-                send(client_sock, ACK, strlen(ACK), 0);
+                int ack = htonl(FAILED);
+                send(client_sock,&ack,sizeof(ack), 0);
+
                 if (handle_client_write_request(path, data) != 0) {
-                    send(sock, "ASYNC FAILED", strlen("ASYNC FAILED"), 0); // Send FAILED to Naming Server
+                    int ack = htonl(FAILED);
+                    send(sock,&ack,sizeof(ack), 0);
 
                     //Release Lock
                     lock->ref_count--;
                     release_file_lock(lock);
                     return NULL;
                 }
-                send(sock, "ASYNC DONE", strlen("ASYNC DONE"), 0);
+                ack = htonl(ASYNCHRONOUS_COMPLETE);
+                send(sock,&ack,sizeof(ack), 0);
             }
             else {      
                 if (handle_client_write_request(path, data) != 0) {  // Synchronous Write
-                    send(client_sock, FAILED, strlen(FAILED), 0);
+                    int ack = htonl(FAILED);
+                    send(client_sock,&ack,sizeof(ack), 0);
                     
                     //Release Lock
                     lock->ref_count--;
                     release_file_lock(lock);
                     return NULL;
                 }
-                send(client_sock, ACK, strlen(ACK), 0);    
+                int ack = htonl(ACK);
+                send(client_sock,&ack,sizeof(ack), 0);  
             }
         } 
         else {
-            send(client_sock, FAILED, strlen(FAILED), 0);
+            int ack = htonl(FAILED);
+            send(client_sock,&ack,sizeof(ack), 0);
         }
 
         //Release Lock
@@ -550,60 +600,71 @@ void* handle_client_request(void* client_socket_ptr) {
     } 
     else if (strcmp(operation, "CREATE") == 0) {
         if (handle_client_create_request(path) == 0) {
-            send(client_sock, ACK, strlen(ACK), 0);
+            int ack = htonl(ACK);
+            send(client_sock,&ack,sizeof(ack), 0);
         } else {
-            send(client_sock, FAILED, strlen(FAILED), 0);
+            int ack = htonl(FAILED);
+            send(client_sock,&ack,sizeof(ack), 0);
         }
     }
     else if (strcmp(operation, "DELETE") == 0) {
-        // FileLock* lock = get_file_lock(path);
-        // if(lock==NULL){
-        //     perror("Can't lock file");
-        //     return;
-        // }
-        // while(1){
-        //     pthread_mutex_lock(&lock->mutex);
-        //     if(lock->ref_count==0){
-        //         break;
-        //     }
-        //     pthread_mutex_unlock(&lock->mutex);
-        // }
-        if (handle_client_delete_request(path) == 0) {
-            send(client_sock, ACK, strlen(ACK), 0);
-        } else {
-            send(client_sock, FAILED, strlen(FAILED), 0);
+        FileLock* lock = get_file_lock(path);
+        if(lock==NULL){
+            perror("Can't lock file");
+            return NULL;
         }
-        // pthread_mutex_unlock(&lock->mutex);
+        while(1){
+            pthread_mutex_lock(&lock->mutex);
+            if(lock->ref_count==0){
+                break;
+            }
+            pthread_mutex_unlock(&lock->mutex);
+        }
+        if (handle_client_delete_request(path) == 0) {
+            int ack = htonl(ACK);
+            send(client_sock,&ack,sizeof(ack), 0);
+        } else {
+            int ack = htonl(FAILED);
+            send(client_sock,&ack,sizeof(ack), 0);
+        }
+        pthread_mutex_unlock(&lock->mutex);
     } 
     else if (strcmp(operation, "INFO") == 0) {
         char info_buffer[BUFFER_SIZE];
         if (handle_client_info_request(path, info_buffer) == 0) {
             send(client_sock, info_buffer, strlen(info_buffer), 0);
-            send(client_sock, ACK, strlen(ACK), 0);
+            int ack = htonl(ACK);
+            send(client_sock,&ack,sizeof(ack), 0);
         } 
         else {
-            send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
+            int ack = htonl(NOT_FOUND);
+            send(client_sock,&ack,sizeof(ack), 0);
         }
     } 
     else if (strcmp(operation, "STREAM") == 0) {
         if (handle_client_stream_request(path, client_sock) == 0) {
-            send(client_sock, ACK, strlen(ACK), 0);
+            int ack = htonl(ACK);
+            send(client_sock,&ack,sizeof(ack), 0);
         } else {
-            send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
+            int ack = htonl(NOT_FOUND);
+            send(client_sock,&ack,sizeof(ack), 0);
         }
     }
     else if (strcmp(operation, "LIST") == 0) {
         handle_client_list_request(client_sock);
-        send(client_sock, ACK, strlen(ACK), 0);
+        int ack = htonl(ACK);
+        send(client_sock,&ack,sizeof(ack), 0);
     }
     else if (strcmp(operation, "ZIP") == 0) {
         char* path = strtok(NULL, "\0");  // Rest of the buffer is the path
         
         // Call zip function
         if (zip_path_and_send(path) == 0) {
-            send(client_sock, ACK, strlen(ACK), 0);
+            int ack = htonl(ACK);
+            send(client_sock,&ack,sizeof(ack), 0);
         } else {
-            send(client_sock, FAILED, strlen(FAILED), 0);
+            int ack = htonl(FAILED);
+            send(client_sock,&ack,sizeof(ack), 0);
         }
         
     } 
@@ -612,13 +673,16 @@ void* handle_client_request(void* client_socket_ptr) {
 
         // Call unzip function
         if (unzip_received_data(input) == 0) {
-            send(client_sock, ACK, strlen(ACK), 0);
+            int ack = htonl(ACK);
+            send(client_sock,&ack,sizeof(ack), 0);
         } else {
-            send(client_sock, FAILED, strlen(FAILED), 0);
+            int ack = htonl(FAILED);
+            send(client_sock,&ack,sizeof(ack), 0);
         }
     }
     else {
-        send(client_sock, FAILED, strlen(FAILED), 0);
+        int ack = htonl(FAILED);
+        send(client_sock,&ack,sizeof(ack), 0);
     }
 
     close(client_sock);
