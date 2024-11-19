@@ -33,14 +33,14 @@
 
 
 // Structure to store metadata about storage servers
-typedef struct {
+typedef struct StorageServer {
     int fd; // active connection
     bool active;
     char ip[INET_ADDRSTRLEN];
     int nm_port;
     int client_port;
-    //char accessible_paths[PATH_SIZE*MAX_PATHS_PER_SERVER]; // comma separated
     TrieNode* paths_root;
+    struct StorageServer* backups[2];
 } StorageServer;
 
 extern StorageServer storage_servers[MAX_SERVERS];

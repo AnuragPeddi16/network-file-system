@@ -446,7 +446,6 @@ void handle_copy_request(int client_fd, char *paths) {
 
     status = ntohl(status);
 
-    char message[BUFFER_SIZE];
     sprintf(message, "Received ack with status %d\n\n", status);
     log_message(message);
 

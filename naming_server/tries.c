@@ -57,12 +57,12 @@ void insert_path_trie(TrieNode *root, char *path) {
             current->first_child = child;
 
             free(path_component);
-            return child;
+            return;
 
         } else if (child == NULL) {
 
             fprintf(stderr, "Invalid file path: %s\n", path);
-            return NULL;
+            return;
 
         }
 
@@ -70,7 +70,7 @@ void insert_path_trie(TrieNode *root, char *path) {
         current = child;
     }
 
-    return NULL;
+    return;
 }
 
 // Function to search for a path in the Trie
