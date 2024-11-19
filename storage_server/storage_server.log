@@ -246,3 +246,206 @@
 [Wed Nov 20 01:08:07 2024
 ] SUCCESS: Discovered 1 paths:
 
+[Wed Nov 20 01:15:48 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:15:48 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:15:48 2024
+] SUCCESS: Storage Server running on port Client_port 59329
+[Wed Nov 20 01:16:06 2024
+] Read Request: Path=./a/old.c
+[Wed Nov 20 01:16:06 2024
+] READ SUCCESS
+[Wed Nov 20 01:18:56 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:18:56 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:18:56 2024
+] SUCCESS: Storage Server running on port Client_port 59967
+[Wed Nov 20 01:26:37 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:26:37 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:26:37 2024
+] SUCCESS: Storage Server running on port Client_port 33309
+[Wed Nov 20 01:28:15 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:28:15 2024
+] Registration connection failed
+[Wed Nov 20 01:28:15 2024
+] SUCCESS: Storage Server running on port Client_port 49215
+[Wed Nov 20 01:28:27 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:28:27 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:28:27 2024
+] SUCCESS: Storage Server running on port Client_port 33283
+[Wed Nov 20 01:29:27 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:29:27 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:29:27 2024
+] SUCCESS: Storage Server running on port Client_port 33617
+[Wed Nov 20 01:30:05 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:30:05 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:30:05 2024
+] SUCCESS: Storage Server running on port Client_port 38801
+[Wed Nov 20 01:31:33 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:31:33 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:31:33 2024
+] SUCCESS: Storage Server running on port Client_port 34649
+[Wed Nov 20 01:32:04 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:32:04 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:32:04 2024
+] SUCCESS: Storage Server running on port Client_port 51417
+[Wed Nov 20 01:36:16 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:36:16 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:36:16 2024
+] SUCCESS: Storage Server running on port Client_port 33923
+[Wed Nov 20 01:40:56 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:40:56 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:40:56 2024
+] SUCCESS: Storage Server running on port Client_port 52879
+[Wed Nov 20 01:43:27 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:43:27 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:43:27 2024
+] SUCCESS: Storage Server running on port Client_port 39609
+[Wed Nov 20 01:45:15 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:45:15 2024
+] Registration connection failed
+[Wed Nov 20 01:45:15 2024
+] SUCCESS: Storage Server running on port Client_port 39275
+[Wed Nov 20 01:45:27 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:45:27 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:45:27 2024
+] SUCCESS: Storage Server running on port Client_port 39051
+[Wed Nov 20 01:45:52 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:45:52 2024
+] Registration connection failed
+[Wed Nov 20 01:45:52 2024
+] SUCCESS: Storage Server running on port Client_port 57397
+[Wed Nov 20 01:46:04 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:46:04 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:46:04 2024
+] SUCCESS: Storage Server running on port Client_port 45213
+[Wed Nov 20 01:48:58 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:48:58 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:48:58 2024
+] SUCCESS: Storage Server running on port Client_port 48869
+[Wed Nov 20 01:51:42 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:51:42 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:51:42 2024
+] SUCCESS: Storage Server running on port Client_port 59271
+[Wed Nov 20 01:53:16 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:53:16 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:53:16 2024
+] SUCCESS: Storage Server running on port Client_port 56937
+[Wed Nov 20 01:54:12 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:54:12 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:54:12 2024
+] SUCCESS: Storage Server running on port Client_port 54239
+[Wed Nov 20 01:56:03 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 01:56:03 2024
+] SUCCESS:Registration
+[Wed Nov 20 01:56:03 2024
+] SUCCESS: Storage Server running on port Client_port 57183
+[Wed Nov 20 01:56:07 2024
+] ERROR: Unable to acquire file lock
+[Wed Nov 20 02:03:40 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 02:03:40 2024
+] SUCCESS:Registration
+[Wed Nov 20 02:03:40 2024
+] SUCCESS: Storage Server running on port Client_port 54547
+[Wed Nov 20 02:04:11 2024
+] ERROR: Unable to acquire file lock
+[Wed Nov 20 02:08:10 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 02:08:10 2024
+] SUCCESS:Registration
+[Wed Nov 20 02:08:10 2024
+] SUCCESS: Storage Server running on port Client_port 53057
+[Wed Nov 20 02:08:13 2024
+] ERROR: Unable to acquire file lock
+[Wed Nov 20 02:10:21 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 02:10:21 2024
+] SUCCESS:Registration
+[Wed Nov 20 02:10:21 2024
+] SUCCESS: Storage Server running on port Client_port 35943
+[Wed Nov 20 02:10:28 2024
+] Write Request: Path=./a/try.c, Size=7 bytes
+[Wed Nov 20 02:10:28 2024
+] WRITE SUCCESS: Path=./a/try.c, Size=7 bytes
+[Wed Nov 20 02:24:03 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 02:24:03 2024
+] SUCCESS:Registration
+[Wed Nov 20 02:24:03 2024
+] SUCCESS: Storage Server running on port Client_port 58759
+[Wed Nov 20 02:29:31 2024
+] SUCCESS: Discovered 4 paths:
+
+[Wed Nov 20 02:29:31 2024
+] SUCCESS:Registration
+[Wed Nov 20 02:29:31 2024
+] SUCCESS: Storage Server running on port Client_port 44317
+[Wed Nov 20 02:33:21 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 02:33:21 2024
+] SUCCESS:Registration
+[Wed Nov 20 02:33:21 2024
+] SUCCESS: Storage Server running on port Client_port 37275

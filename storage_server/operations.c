@@ -15,7 +15,7 @@ int handle_client_write_request(const char* upath, const char* data) {
     }
 
     // Get file-specific lock
-    FileLock* file_lock = get_file_lock(path);
+    FileLock* file_lock = get_file_lock(upath);
     if (!file_lock) {
         log_message("ERROR: Unable to acquire file lock");
         return -1;
@@ -538,16 +538,18 @@ void* handle_client_request(void* client_socket_ptr) {
         release_file_lock(lock);
     } 
     else if (strcmp(operation, "WRITE") == 0) {
+        char* data = strtok(NULL, "");  // Get entire remaining data
+        printf("joined monster = %s %s\n",path,data);
+        
+
         //Get Lock and Do not unlock Write complete
         FileLock* lock = get_file_lock(path);
         if(lock==NULL){
             perror("Can't lock file");
             return NULL;
         }
-        pthread_mutex_lock(&lock->mutex);
 
-
-        char* data = strtok(NULL, "\0");  // Get entire remaining data
+        // char* data = strtok(NULL, "\0");  // Get entire remaining data
         if (data) {
             // Get data size
             size_t data_size = strlen(data);
@@ -560,7 +562,7 @@ void* handle_client_request(void* client_socket_ptr) {
 
             //Write data to file
             if (data_size >= SYNC_THRESHOLD && sync==0) {              // Asynchronous Write
-                int ack = htonl(FAILED);
+                int ack = htonl(ASYNCHRONOUS_COMPLETE);
                 send(client_sock,&ack,sizeof(ack), 0);
 
                 if (handle_client_write_request(path, data) != 0) {
@@ -596,7 +598,6 @@ void* handle_client_request(void* client_socket_ptr) {
 
         //Release Lock
         lock->ref_count--;
-        release_file_lock(lock);
     } 
     else if (strcmp(operation, "CREATE") == 0) {
         if (handle_client_create_request(path) == 0) {

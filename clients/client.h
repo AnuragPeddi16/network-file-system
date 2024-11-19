@@ -43,7 +43,7 @@ typedef struct {
 
 // Function declarations
 int connect_to_server(const char* ip, int port);
-ServerInfo get_storage_server_info(int naming_server_fd, const char* path, int operation);
+ServerInfo get_storage_server_info(int naming_server_fd, const char* path, int operation, char* data);
 int handle_read_operation(const char* path);
 int handle_write_operation(const char* path, const char* content);
 int handle_create_operation(const char* path, const char* name);

@@ -32,7 +32,7 @@ int connect_to_server(const char *ip, int port)
     return sock_fd;
 }
 
-ServerInfo get_storage_server_info(int naming_server_fd, const char *path, int operation)
+ServerInfo get_storage_server_info(int naming_server_fd, const char *path, int operation,char *data)
 {
     ServerInfo server_info = {0};
     char request[BUFFER_SIZE];
@@ -52,7 +52,7 @@ ServerInfo get_storage_server_info(int naming_server_fd, const char *path, int o
             snprintf(request, sizeof(request), "READ %s\n", path);
             break;
         case OP_WRITE:
-            snprintf(request, sizeof(request), "WRITE %s\n", path);
+            snprintf(request, sizeof(request), "WRITE %s %s\n", path, data);
             break;
         case OP_CREATE:
             snprintf(request, sizeof(request), "CREATE %s\n", path);
@@ -62,6 +62,9 @@ ServerInfo get_storage_server_info(int naming_server_fd, const char *path, int o
             break;
         case OP_LIST:
             snprintf(request, sizeof(request), "LIST %s\n", path);
+            break;
+        case OP_INFO:
+            snprintf(request, sizeof(request), "INFO %s\n", path);
             break;
         case OP_STREAM:
             snprintf(request, sizeof(request), "STREAM %s\n", path);
@@ -129,7 +132,7 @@ int handle_read_operation(const char *path)
         return -1;
 
     // Get storage server info
-    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_READ);
+    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_READ, NULL);
     close(naming_server_fd);
     // printf()
 
@@ -194,7 +197,7 @@ int handle_write_operation(const char *path, const char *content)
     if (naming_server_fd < 0)
         return -1;
 
-    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_WRITE);
+    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_WRITE,NULL);
     close(naming_server_fd);
 
     // if (storage_server.port == 0)
@@ -231,7 +234,7 @@ int handle_write_operation(const char *path, const char *content)
 
     // Send write request and content
     char request[BUFFER_SIZE];
-    snprintf(request, sizeof(request), "WRITE %s\n%s", path, content);
+    snprintf(request, sizeof(request), "WRITE %s %s", path, content);
     send(storage_fd, request, strlen(request), 0);
 
     // Wait for acknowledgment
@@ -248,7 +251,7 @@ int handle_stream_operation(const char *path)
     if (naming_server_fd < 0)
         return -1;
 
-    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_STREAM);
+    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_STREAM, NULL);
     close(naming_server_fd);
 
     if (storage_server.port == 0)
@@ -296,7 +299,7 @@ int handle_info_operation(const char *path)
         return -1;
 
     // Get storage server info
-    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_READ);
+    ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_READ, NULL);
     close(naming_server_fd);
     // printf()
 

@@ -120,9 +120,14 @@ void execute_command(int argc, char** args) {
         }
     }
     else if (strcmp(cmd, "WRITE") == 0) {
-        if (argc != 3) {
+        if (argc < 3 || argc > 4 ) { //3 or 4
             printf("Usage: WRITE <path> \"<content>\"\n");
             return;
+        }
+        // if 4 then concatenate 3 and 4
+        if (argc == 4) {
+            strcat(args[2], " ");
+            strcat(args[2], args[3]);
         }
         if (handle_write_operation(args[1], args[2]) == 0) {
             printf("Write operation completed successfully.\n");
@@ -179,7 +184,7 @@ void execute_command(int argc, char** args) {
             printf("Usage: INFO <path>\n");
             return;
         }
-        if (handle_stream_operation(args[1]) == 0) {
+        if (handle_info_operation(args[1]) == 0) {
             printf("INFO operation completed successfully.\n");
         }
     }
