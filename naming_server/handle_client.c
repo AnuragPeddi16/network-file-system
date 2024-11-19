@@ -44,20 +44,50 @@ void send_ss_to_client(StorageServer* ss, int client_fd) {
 
 }
 
-void send_req_to_ss(StorageServer* ss, char* request) {
+int send_req_to_ss(StorageServer* ss, char* request) {
 
     pthread_mutex_lock(&server_mutex);
-    int ss_fd = ss->fd;
+    int ss_client_port = ss->client_port;
+    char ss_ip[INET_ADDRSTRLEN];
+    strcpy(ss_ip, ss->ip);
     pthread_mutex_unlock(&server_mutex);
 
-    if (send(ss_fd, request, strlen(request), 0) < 0) {
+    int ss_client_fd;
+    // Create a socket
+    if ((ss_client_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
 
-        print_error("Error sending request to server");
-        return;
+        print_error("Socket creation failed");
+        return -1;
 
     }
 
-    printf("Forwarded request to server with IP %s and port %d\n", ss->ip, ss->nm_port);
+    // Prepare the sockaddr_in structure
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(ss_client_port);
+
+    // Convert IP address from text to binary form
+    if (inet_pton(AF_INET, ss_ip, &server_addr.sin_addr) <= 0) {
+        print_error("Invalid address/ Address not supported");
+        return -1;
+    }
+
+    // Connect to the server
+    if (connect(ss_client_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        print_error("Connection to the server failed");
+        return -1;
+    }
+
+    if (send(ss_client_fd, request, strlen(request), 0) < 0) {
+
+        print_error("Error sending request to server");
+        return -1;
+
+    }
+
+    printf("Forwarded request to server with IP %s and port %d\n", ss->ip, ss->client_port);
+    return ss_client_fd;
 
 }
 
@@ -188,10 +218,10 @@ void handle_create_request(int client_fd, char* request, char *path) {
 
     }
     
-    send_req_to_ss(ss, request);
+    int ss_client_fd = send_req_to_ss(ss, request);
 
     int status;
-    int bytes_received = recv(ss->fd, &status, sizeof(status), 0);
+    int bytes_received = recv(ss_client_fd, &status, sizeof(status), 0);
 
     if (bytes_received < 0) {
 
@@ -199,6 +229,8 @@ void handle_create_request(int client_fd, char* request, char *path) {
         return;
 
     }
+
+    close(ss_client_fd);
 
     status = ntohl(status);
 
@@ -227,10 +259,10 @@ void handle_delete_request(int client_fd, char* request, char *path) {
 
     }
 
-    send_req_to_ss(ss, request);
+    int ss_client_fd = send_req_to_ss(ss, request);
 
     int status;
-    int bytes_received = recv(ss->fd, &status, sizeof(status), 0);
+    int bytes_received = recv(ss_client_fd, &status, sizeof(status), 0);
 
     if (bytes_received < 0) {
 
@@ -238,6 +270,8 @@ void handle_delete_request(int client_fd, char* request, char *path) {
         return;
 
     }
+
+    close(ss_client_fd);
 
     status = ntohl(status);
 
@@ -254,9 +288,15 @@ void handle_copy_request(int client_fd, char *paths) {
 
     //TODO: copy folder, add accessible paths
 
+    bool isFile = false;
+
     char* file_path;
-    if (strncmp(paths, "FILE", 4) == 0) file_path = paths + 5;
-    else file_path = paths + 7;
+    if (strncmp(paths, "FILE", 4) == 0) {
+        
+        file_path = paths + 5;
+        isFile = true;
+
+    } else file_path = paths + 7;
 
     // Parse paths to extract source and destination paths
     char *source_path = strtok(paths, " ");
@@ -269,6 +309,9 @@ void handle_copy_request(int client_fd, char *paths) {
         return;
 
     }
+
+    if (source_path[strlen(source_path)-1] == '/') source_path[strlen(source_path)-1] = '\0';
+    if (destination_path[strlen(destination_path)-1] == '/') destination_path[strlen(destination_path)-1] = '\0';
 
     // Find source and destination storage servers
     StorageServer *source_ss = NULL;
@@ -293,17 +336,19 @@ void handle_copy_request(int client_fd, char *paths) {
 
     // Send a read request to the source storage server
     char read_request[BUFFER_SIZE];
-    snprintf(read_request, BUFFER_SIZE, "READ %s", source_path);
-    send_req_to_ss(source_ss, read_request);
+    if (isFile) snprintf(read_request, BUFFER_SIZE, "READ %s", source_path);
+    else snprintf(read_request, BUFFER_SIZE, "ZIP %s", source_path);
+    int source_ss_fd = send_req_to_ss(source_ss, read_request);
 
     // Send a create request to the destination storage server
     char create_request[BUFFER_SIZE];
-    snprintf(create_request, BUFFER_SIZE, "CREATE FILE %s", destination_path);
-    send_req_to_ss(source_ss, create_request);
+    if (isFile) snprintf(create_request, BUFFER_SIZE, "CREATE FILE %s", destination_path);
+    else snprintf(create_request, BUFFER_SIZE, "CREATE FOLDER %s/", destination_path);
+    int dest_ss_fd = send_req_to_ss(destination_path, create_request);
 
     // Receive status from the destination storage server
     int status;
-    if (recv(destination_ss->fd, &status, sizeof(status), 0) < 0) {
+    if (recv(dest_ss_fd, &status, sizeof(status), 0) < 0) {
 
         print_error("Error receiving status from destination storage server");
         return;
@@ -322,21 +367,41 @@ void handle_copy_request(int client_fd, char *paths) {
 
     insert_path_trie(destination_ss->paths_root, destination_path);
 
-    // Send a write request to the destination storage server
-    char write_request[BUFFER_SIZE];
-    snprintf(write_request, BUFFER_SIZE, "WRITE %s", destination_path);
-    send_req_to_ss(destination_ss, write_request);
-
-    // Loop to read from the source and write to the destination
-    char data_buffer[BUFFER_SIZE];
     int bytes_received;
-    while ((bytes_received = recv(source_ss->fd, data_buffer, sizeof(data_buffer), 0)) > 0) {
 
-        // Send the data chunk to the destination
-        if (send(destination_ss->fd, data_buffer, bytes_received, 0) < 0) {
-            print_error("Error sending data to destination storage server");
-            return;
+    if (isFile) {
+
+        // Loop to read from the source and write to the destination
+        char data_buffer[BUFFER_SIZE];
+        while ((bytes_received = recv(source_ss_fd, data_buffer, sizeof(data_buffer), 0)) > 0) {
+
+            char* ptr;
+            if ((ptr = strstr(data_buffer, "STOP")) != NULL) *ptr = '\0';
+
+            // Send a write request to the destination storage server
+            char write_request[BUFFER_SIZE];
+            snprintf(write_request, BUFFER_SIZE, "WRITE %s \"%s\"", destination_path, data_buffer);
+            close(dest_ss_fd);
+            dest_ss_fd = send_req_to_ss(destination_ss, write_request);
+
         }
+
+    } else {
+
+        char data_buffer[MAX_FILE_SIZE];
+        bytes_received = recv(source_ss_fd, data_buffer, sizeof(data_buffer), 0);
+        if (bytes_received < 0) {
+
+            print_error("copying write failed");
+            return;
+
+        }
+
+        // Send a write request to the destination storage server
+        char write_request[MAX_FILE_SIZE + PATH_SIZE + 100];
+        snprintf(write_request, BUFFER_SIZE, "UNZIP %s \"%s\"", destination_path, data_buffer);
+        close(dest_ss_fd);
+        dest_ss_fd = send_req_to_ss(destination_ss, write_request);
 
     }
 
@@ -346,10 +411,13 @@ void handle_copy_request(int client_fd, char *paths) {
     }
 
     // Receive status from the destination storage server
-    if (recv(destination_ss->fd, &status, sizeof(status), 0) < 0) {
+    if (recv(dest_ss_fd, &status, sizeof(status), 0) < 0) {
         print_error("Error receiving acknowledgment from destination storage server");
         return;
     }
+
+    close(source_ss_fd);
+    close(dest_ss_fd);
 
     // Send acknowledgment back to the client
     if (send(client_fd, &status, sizeof(status), 0) < 0) {

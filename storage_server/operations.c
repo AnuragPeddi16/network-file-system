@@ -487,6 +487,10 @@ int unzip_received_data(const char* input) {
         config.num_paths++;
     }
     pthread_mutex_unlock(&config.config_mutex);
+
+    int ack = htonl(ACK);
+    send(sock,&ack,sizeof(ack), 0);
+
     return 0;
 }
 
