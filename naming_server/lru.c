@@ -100,6 +100,8 @@ StorageServer* cache_search_insert(char *path) {
     // Translate the path to a StorageServer *
     ss = search_path(path);
 
+    if (ss == NULL) return NULL;
+
     // Add to the head of the cache
     node *new_node = tail; // Reuse the least recently used node
     tail = tail->prev; // Update tail pointer
