@@ -84,11 +84,17 @@ void *accept_ss_connections(void *args) {
     struct sockaddr_in server_addr;
 
     // Create a socket
-    if ((nm_fd = socket(AF_INET, SOCK_STREAM, SO_REUSEADDR)) == 0) {
+    if ((nm_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
 
         print_error("Socket creation failed");
         exit(EXIT_FAILURE);
 
+    }
+
+    int opt = 1;
+    if (setsockopt(nm_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        print_error("setsockopt failed");
+        exit(EXIT_FAILURE);
     }
 
     // Bind the socket
@@ -163,11 +169,17 @@ void *accept_client_connections(void *args) {
     struct sockaddr_in server_addr;
 
     // Create a socket
-    if ((nm_fd = socket(AF_INET, SOCK_STREAM, SO_REUSEADDR)) == 0) {
+    if ((nm_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
 
         print_error("Socket creation failed");
         exit(EXIT_FAILURE);
 
+    }
+
+    int opt = 1;
+    if (setsockopt(nm_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        print_error("setsockopt failed");
+        exit(EXIT_FAILURE);
     }
 
     // Bind the socket
