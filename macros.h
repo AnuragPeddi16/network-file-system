@@ -1,6 +1,8 @@
 #ifndef _MACROS_H_
 #define _MACROS_H_
 
+#define ASYNC_LIMIT 100
+
 /* STATUS CODES */
 #define OK 0
 #define ACK 1

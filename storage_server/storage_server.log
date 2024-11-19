@@ -19,3 +19,20 @@
 [Tue Nov 19 21:54:04 2024
 ] SUCCESS: Discovered 4 paths:
 
+[Tue Nov 19 21:59:29 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 21:59:29 2024
+] FAILED:Registration
+[Tue Nov 19 21:59:29 2024
+] SUCCESS: Storage Server running on port Client_port 51593
+[Tue Nov 19 21:59:56 2024
+] Read Request: Path=a/try.c
+
+[Tue Nov 19 21:59:56 2024
+] ERROR: Unable to open file for Reading
+[Tue Nov 19 22:02:37 2024
+] Read Request: Path=a
+
+[Tue Nov 19 22:02:37 2024
+] ERROR: Unable to open file for Reading
