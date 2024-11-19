@@ -375,7 +375,7 @@ void handle_copy_request(int client_fd, char *paths) {
     sprintf(message, "Received ack with status %d\n\n", status);
     log_message(message);
 
-    if (status != OK) {
+    if (status != ACK) {
 
         status = htonl(status);
         if (send(client_fd, &status, sizeof(status), 0) < 0) print_error("Error sending status to client");

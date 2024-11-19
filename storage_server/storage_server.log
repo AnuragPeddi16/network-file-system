@@ -774,3 +774,112 @@
 ] Create Request:FOLDER Path=b/c/
 [Wed Nov 20 04:53:23 2024
 ] Folder created
+[Wed Nov 20 05:00:36 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:00:36 2024
+] Registration connection failed
+[Wed Nov 20 05:00:36 2024
+] SUCCESS: Storage Server running on port Client_port 55781
+[Wed Nov 20 05:01:52 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:01:52 2024
+] SUCCESS:Registration
+[Wed Nov 20 05:01:52 2024
+] SUCCESS: Storage Server running on port Client_port 55497
+[Wed Nov 20 05:02:32 2024
+] READ a/old.c
+[Wed Nov 20 05:02:32 2024
+] CREATE FILE b/new.c
+[Wed Nov 20 05:02:32 2024
+] Read Request: Path=./a/old.c
+[Wed Nov 20 05:02:32 2024
+] Create Request:FILE Path=b/new.c
+[Wed Nov 20 05:02:32 2024
+] File created
+[Wed Nov 20 05:02:32 2024
+] READ SUCCESS
+[Wed Nov 20 05:06:39 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:06:39 2024
+] SUCCESS:Registration
+[Wed Nov 20 05:06:39 2024
+] SUCCESS: Storage Server running on port Client_port 57485
+[Wed Nov 20 05:07:00 2024
+] READ a/old.c
+[Wed Nov 20 05:07:00 2024
+] CREATE FILE b/new.c
+[Wed Nov 20 05:07:00 2024
+] Read Request: Path=./a/old.c
+[Wed Nov 20 05:07:00 2024
+] Create Request:FILE Path=b/new.c
+[Wed Nov 20 05:07:00 2024
+] File created
+[Wed Nov 20 05:07:00 2024
+] READ SUCCESS
+[Wed Nov 20 05:08:45 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:08:45 2024
+] SUCCESS:Registration
+[Wed Nov 20 05:08:45 2024
+] SUCCESS: Storage Server running on port Client_port 36923
+[Wed Nov 20 05:08:51 2024
+] READ a/old.c
+[Wed Nov 20 05:08:51 2024
+] CREATE FILE b/new.c
+[Wed Nov 20 05:08:51 2024
+] Create Request:FILE Path=b/new.c
+[Wed Nov 20 05:08:51 2024
+] Read Request: Path=./a/old.c
+[Wed Nov 20 05:08:51 2024
+] File created
+[Wed Nov 20 05:08:51 2024
+] READ SUCCESS
+[Wed Nov 20 05:10:06 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:10:06 2024
+] SUCCESS:Registration
+[Wed Nov 20 05:10:06 2024
+] SUCCESS: Storage Server running on port Client_port 41227
+[Wed Nov 20 05:10:12 2024
+] READ a/old.c
+[Wed Nov 20 05:10:12 2024
+] CREATE FILE b/new.c
+[Wed Nov 20 05:10:12 2024
+] Read Request: Path=./a/old.c
+[Wed Nov 20 05:10:12 2024
+] Create Request:FILE Path=b/new.c
+[Wed Nov 20 05:10:12 2024
+] File created
+[Wed Nov 20 05:10:12 2024
+] WRITE b/new.c "#include "operations.h"
+
+// Enhanced write request handler with file-level locking
+int handle_client_write_request(const char* upath, const char* data) {
+    char* path=malloc(sizeof(upath)+4);
+    strcpy(path,"./");
+    strcat(path,upath);
+
+    int sync=0;
+    const char *substring = "SYNC";
+    if (strstr(path, substring) != NULL) {
+        sync=1;
+        strtok(path, "-");
+        log_message("SYNC Write Request");
+    }
+
+    // Get file-specific lock
+    FileLock* file_lock = get_file_lock(upath);
+    if (!file_lock) {
+        log_message("ERROR: Unable to acquire file lock");
+        return -1;
+    }
+
+    // Acquire lock for this specific file
+"
+[Wed Nov 20 05:10:12 2024
+] READ SUCCESS

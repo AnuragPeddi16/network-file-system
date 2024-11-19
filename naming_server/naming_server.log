@@ -1,14 +1,12 @@
-[20-11-2024 04:53:09] Naming server listening for storage servers on port 8050 at ip 192.168.188.46
+[20-11-2024 05:10:02] Naming server listening for storage servers on port 8050 at ip 10.1.131.145
 
-[20-11-2024 04:53:09] Naming server listening for clients on port 8051 at ip 192.168.188.46
+[20-11-2024 05:10:02] Naming server listening for clients on port 8051 at ip 10.1.131.145
 
-[20-11-2024 04:53:14] Received server connection...
-[20-11-2024 04:53:14] Storage server added: IP 127.0.0.1, Port 44128
+[20-11-2024 05:10:06] Received server connection...
+[20-11-2024 05:10:06] Storage server added: IP 127.0.0.1, Port 52060
 
-[20-11-2024 04:53:23] Accepted client connection 6
-[20-11-2024 04:53:23] Received request from client: CREATE FOLDER b/c/
+[20-11-2024 05:10:12] Accepted client connection 6
+[20-11-2024 05:10:12] Received request from client: COPY FILE a/old.c b/new.c
 
-[20-11-2024 04:53:23] Received ack with status 1
-
-[20-11-2024 04:53:23] Client connection 6 closed.
+[20-11-2024 05:10:12] Received ack with status 1
 

@@ -621,15 +621,15 @@ int handle_copy_operation(const char* dir, const char *source, const char *dest)
     response = ntohl(response);
     if (response == ACK)
     {
-        printf(GREEN("File/Folder deleted normally\n"));
+        printf(GREEN("File/Folder copied normally\n"));
     }
     else if (response == FAILED)
     {
-        printf(MAGENTA("File/Folder delete failed\n"));
+        printf(MAGENTA("File/Folder copy failed\n"));
     }
     else
     {
-        printf(RED("delete unknown error\n"));
+        printf(RED("copying unknown error\n"));
     }    
 
     close(naming_server_fd);
