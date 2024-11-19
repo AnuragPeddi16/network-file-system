@@ -1,8 +1,5 @@
 #include "utils.h"
 
-// Initialize the global configuration variable
-StorageServerConfig config;
-
 // Trim leading and trailing whitespaces from a string
 char* trim_whitespace(char* str) {
     if (str == NULL) return NULL;
@@ -27,7 +24,7 @@ void parse_paths(char* paths_arg) {
     // Use a copy of the argument to avoid modifying original
     char paths_copy[BUFFER_SIZE];
     strncpy(paths_copy, paths_arg, sizeof(paths_copy) - 1);
-    paths_copy[sizeof(paths_copy) - 1] = '\0';
+    paths_copy[sizeof(paths_copy) - 1] = '\0'; // Ensure null-terminated
 
     // First tokenization pass
     char* path_token = strtok(paths_copy, ",");
@@ -44,11 +41,12 @@ void parse_paths(char* paths_arg) {
 
         // Validate path
         if (access(trimmed_path, F_OK) != 0) { // Check if path exists Relative Path too!
-            fprintf(stderr, "Warning: Path '%s' does not exist\n", trimmed_path);
-            return;
+            char* message;
+            asprintf(&message, "Error: Path '%s' does not exist", trimmed_path);
+            log_message(message);
+            path_token = strtok(NULL, ",");
+            continue;
         }
-        printf("Discovered %d paths:\n", config.num_paths);
-
         // Copy trimmed path
         strcpy(config.accessible_paths[config.num_paths], trimmed_path);
         config.num_paths++;
@@ -56,6 +54,9 @@ void parse_paths(char* paths_arg) {
         // Get next path
         path_token = strtok(NULL, ",");
     }
+    char* message;
+    asprintf(&message, "SUCCESS: Discovered %d paths:\n", config.num_paths);
+    log_message(message);
 }
 
 // Logging mechanism
@@ -71,7 +72,7 @@ void log_message(const char* message) {
 
 // Function to find a free port
 int find_free_port() {
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    sock = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
@@ -89,7 +90,7 @@ int find_free_port() {
     //Potential code to search for free port in a range
     
     // for (int port = min_port; port <= max_port; port++) {
-    //     int sock = socket(AF_INET, SOCK_STREAM, 0);
+    //     sock = socket(AF_INET, SOCK_STREAM, 0);
     //     struct sockaddr_in addr;
     //     addr.sin_family = AF_INET;
     //     addr.sin_addr.s_addr = INADDR_ANY;

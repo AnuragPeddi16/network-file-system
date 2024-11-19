@@ -1,7 +1,7 @@
+// utils.h
 #ifndef UTILS_H
 #define UTILS_H
 
-//Header Files
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +15,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <ctype.h>
-#include "utils.h"
+#include <time.h>
 
 // Define constants
 #define BUFFER_SIZE 4096
@@ -44,10 +44,11 @@ typedef struct {
 
 // Global configuration variable
 extern StorageServerConfig config;
+extern int sock;
 
 // Global array to track file locks
-FileLock file_locks[MAX_CONCURRENT_FILES];
-pthread_mutex_t file_locks_mutex = PTHREAD_MUTEX_INITIALIZER;
+extern FileLock file_locks[];
+extern pthread_mutex_t file_locks_mutex;
 
 // Function declarations
 char* trim_whitespace(char* str);
@@ -55,5 +56,8 @@ void parse_paths(char* paths_arg);
 void log_message(const char* message);
 int find_free_port();
 char* get_storage_server_ip();
+void initialize_file_locks();
+FileLock* get_file_lock(const char* filename);
+void release_file_lock(FileLock* lock);
 
 #endif // UTILS_H

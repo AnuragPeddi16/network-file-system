@@ -1,167 +1,39 @@
 #include "operations.h"
 
-// Function to handle client requests
-void* handle_client_request(void* client_socket_ptr) {
-    int client_sock = *(int*)client_socket_ptr;
-    char buffer[BUFFER_SIZE];
-    int bytes_read = recv(client_sock, buffer, sizeof(buffer), 0);
-    
-    if (bytes_read <= 0) {
-        close(client_sock);
-        free(client_socket_ptr);
-        return NULL;
-    }
-    buffer[bytes_read] = '\0';
-
-    // Tokenize the request
-    char* operation = strtok(buffer, " ");
-    char* path = strtok(NULL, " ");  // For CREATE/DELETE/COPY It will be FILE/FOLDER
-
-    // Handle different operations
-    if (operation == NULL) {
-        send(client_sock, FAILED, strlen(FAILED), 0);
-    } 
-    else if (strcmp(operation, "READ") == 0) {
-        if (handle_client_read_request(path, client_sock) == 0) {
-            send(client_sock, ACK, strlen(ACK), 0);
-        } 
-        else {
-            send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
-        }
-    } 
-    else if (strcmp(operation, "WRITE") == 0) {
-        char* data = strtok(NULL, " ");  // For WRITE operation, this will be the data to write
-        if (data) {
-            // Get data size
-            size_t data_size = strlen(data);
-            
-            //Check if file exists
-            FILE* file = fopen(path, "w");
-            if (!file) {
-                send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
-                return;
-            }
-            fclose(file);
-
-            //Write data to file
-            if (data_size >= SYNC_THRESHOLD) {              //Asynchronous Write
-                send(client_sock, ACK, strlen(ACK), 0);
-                if (handle_client_write_request(path, data) != 0) {
-                    send(sock, "ASYNC FAILED", strlen("ASYNC FAILED"), 0); //Send FAILED to Naming Server
-                    return;
-                }
-                send(sock,"ASYNC DONE", strlen("ASYNC DONE"), 0);
-            }
-            else {      
-                if (handle_client_write_request(path, data) != 0) {  //Synchronous Write
-                    send(client_sock, FAILED, strlen(FAILED), 0);
-                    return;
-                }
-                send(client_sock, ACK, strlen(ACK), 0);    
-            }
-        } 
-        else {
-            send(client_sock, FAILED, strlen(FAILED), 0);
-        }
-    } 
-    else if (strcmp(operation, "CREATE") == 0) {
-        if (handle_client_create_request(path) == 0) {
-            send(sock, ACK, strlen(ACK), 0);
-        } else {
-            send(sock, FAILED, strlen(FAILED), 0);
-        }
-    }
-    else if (strcmp(operation, "DELETE") == 0) {
-        if (handle_client_delete_request(path) == 0) {
-            send(sock, ACK, strlen(ACK), 0);
-        } else {
-            send(sock, FAILED, strlen(FAILED), 0);
-        }
-    } 
-    else if (strcmp(operation, "INFO") == 0) {
-        char info_buffer[BUFFER_SIZE];
-        if (handle_client_info_request(path, info_buffer) == 0) {
-            send(client_sock, info_buffer, strlen(info_buffer), 0);
-            send(client_sock, ACK, strlen(ACK), 0);
-        } 
-        else {
-            send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
-        }
-    } 
-    else if (strcmp(operation, "STREAM") == 0) {
-        if (handle_client_stream_request(path, client_sock) == 0) {
-            send(client_sock, ACK, strlen(ACK), 0);
-        } else {
-            send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
-        }
-    }
-    else if (strcmp(operation, "LIST") == 0) {
-        handle_client_list_request(client_sock);
-        send(client_sock, ACK, strlen(ACK), 0);
-    }
-    else if (strcmp(operation, "ZIP") == 0) {
-        char* path = strtok(NULL, "\0");  // Rest of the buffer is the path
-        
-        // Call zip function
-        zip_path_and_send(path);
-    } 
-    else if (strcmp(operation, "UNZIP") == 0) {
-        char * destination_path = strtok(NULL, " ");  // Get the destination path
-        char* data = strtok(NULL, "\0");  // Get the data to unzip
-
-        // Call unzip function
-        unzip_received_data(destination_path);
-    }
-
-    else {
-        send(client_sock, FAILED, strlen(FAILED), 0);
-    }
-
-    close(client_sock);
-    free(client_socket_ptr);
-    return NULL;
-}
-
-// Handle READ request
-int handle_client_read_request(const char* path, int client_socket) {
-    char buffer[BUFFER_SIZE];
-    FILE* file = fopen(path, "r");
-    if (!file) {
-        return -1; // File not found
-    }
-
-    while (fgets(buffer, sizeof(buffer), file)) {
-        send(client_socket, buffer, strlen(buffer), 0);
-    }
-    fclose(file);
-    return 0;
-}
-
+// Enhanced write request handler with file-level locking
 int handle_client_write_request(const char* path, const char* data) {
+    // Get file-specific lock
+    FileLock* file_lock = get_file_lock(path);
+    if (!file_lock) {
+        log_message("ERROR: Unable to acquire file lock");
+        return -1;
+    }
+
+    // Acquire lock for this specific file
+    pthread_mutex_lock(&file_lock->mutex);
+
     size_t data_size = strlen(data);
     
     // Log the write attempt
     char log_msg[256];
-    snprintf(log_msg, sizeof(log_msg), 
-             "Write Request: Path=%s, Size=%zu bytes", path, data_size);
+    snprintf(log_msg, sizeof(log_msg), "Write Request: Path=%s, Size=%zu bytes", path, data_size);
     log_message(log_msg);
 
     FILE* file = fopen(path, "w");
     if (!file) {
         log_message("ERROR: Unable to open file for synchronous writing");
+        pthread_mutex_unlock(&file_lock->mutex);
+        release_file_lock(file_lock);
         return -1;
     }
+
+    int write_result = 0;
 
     // Choose writing strategy based on data size
     if (data_size > SYNC_THRESHOLD) {
         // Segmented writing for large data
         size_t written = 0;
         while (written < data_size) {
-            // Ensure all data is written to disk
-            if (fflush(file) != 0) {
-                log_message("WARNING: Data may not be fully flushed to disk");
-            }
-            
             size_t remaining = data_size - written;
             size_t write_size = (remaining < SEGMENT_SIZE) ? remaining : SEGMENT_SIZE;
             
@@ -171,8 +43,8 @@ int handle_client_write_request(const char* path, const char* data) {
             if (segment_written != write_size) {
                 // Error during writing
                 log_message("ERROR: Partial write during segmented writing");
-                fclose(file);
-                return -1;
+                write_result = -1;
+                break;
             }
             written += segment_written;
             usleep(10000);  // 10 milliseconds
@@ -184,8 +56,7 @@ int handle_client_write_request(const char* path, const char* data) {
         
         if (written != data_size) {
             log_message("ERROR: Incomplete write in single-go");
-            fclose(file);
-            return -1;
+            write_result = -1;
         }
     }
 
@@ -195,15 +66,41 @@ int handle_client_write_request(const char* path, const char* data) {
     }
     fclose(file);
 
-    // Log successful write
-    snprintf(log_msg, sizeof(log_msg), 
-             "Write Successful: Path=%s, Size=%zu bytes", path, data_size);
+    // Release file-specific lock
+    pthread_mutex_unlock(&file_lock->mutex);
+    release_file_lock(file_lock);
+
+    if (write_result == 0) {
+        // Log successful write
+        snprintf(log_msg, sizeof(log_msg), "WRITE SUCCESS: Path=%s, Size=%zu bytes", path, data_size);
+        log_message(log_msg);
+    }
+
+    return write_result;
+}
+
+// Enhanced read request handler with file-level locking
+int handle_client_read_request(const char* path, int client_socket) {
+    char buffer[BUFFER_SIZE];
+    FILE* file = fopen(path, "r");
+    
+    // Log the read attempt
+    char log_msg[256];
+    snprintf(log_msg, sizeof(log_msg), "Read Request: Path=%s", path);
     log_message(log_msg);
 
+    if (!file) {
+        log_message("ERROR: Unable to open file for Reading");
+        return -1; // File not found
+    }
+    while (fgets(buffer, sizeof(buffer), file)) {
+        send(client_socket, buffer, strlen(buffer), 0);
+    }
+    fclose(file);
+    log_message("READ SUCCESS");
     return 0;
 }
 
-// Handle CREATE request
 int handle_client_create_request(const char* path) {
     // If you want to tokenize `path` further
     char path_copy[MAX_PATH_LENGTH];
@@ -212,8 +109,19 @@ int handle_client_create_request(const char* path) {
 
     // Tokenize to type
     char* type = strtok(path_copy, " ");
+
+    // Log the Create attempt
+    char log_msg[256];
+    snprintf(log_msg, sizeof(log_msg), "Create Request:%s Path=%s",type,path);
+    log_message(log_msg);
+
     if (strcmp(type, "FILE") == 0) {
         char* actual_path = strtok(NULL, " ");
+        
+        //Add to config accessible paths
+        config.num_paths++;
+        strcpy(config.accessible_paths[config.num_paths],actual_path);
+
         // Create an empty file (original implementation)
         FILE* file = fopen(actual_path, "w");
         if (!file) {
@@ -221,15 +129,20 @@ int handle_client_create_request(const char* path) {
             return -1;
         }
         fclose(file);
+        
+        log_message("File created");
         return 0;
     }
     else if (strcmp(type, "FOLDER") == 0) {
         char* actual_path = strtok(NULL, " ");
+        config.num_paths++;
+        strcpy(config.accessible_paths[config.num_paths],actual_path);
         // Create directory with 0755 permissions
         if (mkdir(actual_path, 0755) != 0) {
             log_message("ERROR: Unable to create folder");
             return -1;
         }
+        log_message("Folder created");
         return 0;
     }
     else {
@@ -247,7 +160,22 @@ int handle_client_delete_request(const char* path) {
 
     // Tokenize to type
     char* type = strtok(path_copy, " ");
+
+    // Log the Create attempt
+    char log_msg[256];
+    snprintf(log_msg, sizeof(log_msg), "Delete Request:%s Path=%s",type,path);
+    log_message(log_msg);
+
     char* actual_path = strtok(NULL, " ");
+    for(int i=0;i<config.num_paths;i++){
+        if(strcmp(config.accessible_paths[i],actual_path)==0){
+            for(int j=i;j<config.num_paths-1;j++){
+                strcpy(config.accessible_paths[j],config.accessible_paths[j+1]);
+            }
+            config.num_paths--;
+            break;
+        }
+    }
 
     //Check
     if (type == NULL || actual_path == NULL) {
@@ -260,6 +188,7 @@ int handle_client_delete_request(const char* path) {
         // Delete a file
         if (remove(actual_path)) {
             return 0;
+            log_message("File Deleted");
         }
         log_message("ERROR: Unable to Delete file");
         return -1;
@@ -268,6 +197,7 @@ int handle_client_delete_request(const char* path) {
         // Delete a directory
         if (rmdir(actual_path) == 0) {
             return 0;
+            log_message("Folder Deleted");
         }
         log_message("ERROR: Unable to create folder");
         return -1;
@@ -405,14 +335,17 @@ int zip_path_and_send(const char* source_path) {
 
     // Check if entire file was sent
     if (sent_bytes != file_size) {
-        send(sock, FAILED, sizeof(FAILED), 0);
         return -1;
     }
     return 0;
 }
 
 // Function to unzip received data to a destination
-int unzip_received_data(const char* destination_path) {
+int unzip_received_data(const char* input) {
+    char* copy_path = strdup(input);
+    char* destination_path= strtok(copy_path, " ");
+    char* data= strtok(NULL, "\0");
+
     // Ensure destination directory exists
     if (mkdir(destination_path, 0755) != 0 && errno != EEXIST) {
         send(sock, FAILED, strlen(FAILED), 0);
@@ -423,44 +356,23 @@ int unzip_received_data(const char* destination_path) {
     char zip_path[MAX_PATH_LENGTH];
     snprintf(zip_path, sizeof(zip_path), "/tmp/unzip_%ld.zip", time(NULL));
 
-    // Receive file size first
-    char size_buffer[32];
-    recv(sock, size_buffer, sizeof(size_buffer), 0);
-    long file_size = atol(size_buffer);
-
-    // Send acknowledgment
-    send(sock, ACK, sizeof(ACK), 0);
-
-    // Allocate buffer for file contents
-    char* file_buffer = malloc(file_size);
-    if (!file_buffer) {
-        send(sock, FAILED, strlen(FAILED), 0);
-        return -1;
-    }
-
-    // Receive file contents
-    ssize_t received_bytes = 0;
-    ssize_t total_received = 0;
-    while (total_received < file_size) {
-        received_bytes = recv(sock, file_buffer + total_received, file_size - total_received, 0);
-        if (received_bytes <= 0) {
-            free(file_buffer);
-            send(sock, FAILED, strlen(FAILED), 0);
-            return -1;
-        }
-        total_received += received_bytes;
-    }
-
-    // Write received data to temporary zip file
+     // Write received zip data to temporary file
     FILE* zip_file = fopen(zip_path, "wb");
     if (!zip_file) {
-        free(file_buffer);
         send(sock, FAILED, strlen(FAILED), 0);
+        log_message("ERROR: Unable to create temporary zip file");
         return -1;
     }
-    fwrite(file_buffer, 1, file_size, zip_file);
+    
+    size_t data_size = strlen(data);
+    size_t written = fwrite(data, 1, data_size, zip_file);
     fclose(zip_file);
-    free(file_buffer);
+
+    if (written != data_size) {
+        send(sock, FAILED, strlen(FAILED), 0);
+        log_message("ERROR: Unable to write zip data to temporary file");
+        return -1;
+    }
 
     // Unzip the file
     char unzip_command[2*MAX_PATH_LENGTH];
@@ -474,9 +386,16 @@ int unzip_received_data(const char* destination_path) {
     remove(zip_path);
 
     if (unzip_result != 0) {
-        send(sock, FAILED, strlen(FAILED), 0);
+        log_message("ERROR: Unzip operation failed");
         return -1;
     }
+
+    // Log successful unzip
+    char log_msg[256];
+    snprintf(log_msg, sizeof(log_msg), 
+             "UNZIP SUCCESS: Destination=%s, Data Size=%zu", 
+             destination_path, data_size);
+    log_message(log_msg);
 
     // Update accessible paths
     if (config.num_paths < MAX_ACCESSIBLE_PATHS) {
@@ -485,8 +404,126 @@ int unzip_received_data(const char* destination_path) {
                  "%s", destination_path);
         config.num_paths++;
     }
-
-    send(sock, ACK, strlen(ACK), 0);
     return 0;
 }
 
+// Function to handle client requests with lock support
+void* handle_client_request(void* client_socket_ptr) {
+    int client_sock = *(int*)client_socket_ptr;
+    char buffer[BUFFER_SIZE];
+    int bytes_read = recv(client_sock, buffer, sizeof(buffer), 0);
+    
+    if (bytes_read <= 0) {
+        close(client_sock);
+        free(client_socket_ptr);
+        return NULL;
+    }
+    buffer[bytes_read] = '\0';
+
+    // Tokenize the request
+    char* operation = strtok(buffer, " ");
+    char* path = strtok(NULL, " ");  // For CREATE/DELETE/COPY It will be FILE/FOLDER
+
+    // Handle different operations
+    if (operation == NULL) {
+        send(client_sock, FAILED, strlen(FAILED), 0);
+    } 
+    else if (strcmp(operation, "READ") == 0) {
+        if (handle_client_read_request(path, client_sock) == 0) {
+            send(client_sock, ACK, strlen(ACK), 0);
+        } 
+        else {
+            send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
+        }
+    } 
+    else if (strcmp(operation, "WRITE") == 0) {
+        char* data = strtok(NULL, "\0");  // Get entire remaining data
+        if (data) {
+            // Get data size
+            size_t data_size = strlen(data);
+            
+            //Write data to file
+            if (data_size >= SYNC_THRESHOLD) {              // Asynchronous Write
+                send(client_sock, ACK, strlen(ACK), 0);
+                if (handle_client_write_request(path, data) != 0) {
+                    send(sock, "ASYNC FAILED", strlen("ASYNC FAILED"), 0); // Send FAILED to Naming Server
+                    return NULL;
+                }
+                send(sock, "ASYNC DONE", strlen("ASYNC DONE"), 0);
+            }
+            else {      
+                if (handle_client_write_request(path, data) != 0) {  // Synchronous Write
+                    send(client_sock, FAILED, strlen(FAILED), 0);
+                    return NULL;
+                }
+                send(client_sock, ACK, strlen(ACK), 0);    
+            }
+        } 
+        else {
+            send(client_sock, FAILED, strlen(FAILED), 0);
+        }
+    } 
+    else if (strcmp(operation, "CREATE") == 0) {
+        if (handle_client_create_request(path) == 0) {
+            send(client_sock, ACK, strlen(ACK), 0);
+        } else {
+            send(client_sock, FAILED, strlen(FAILED), 0);
+        }
+    }
+    else if (strcmp(operation, "DELETE") == 0) {
+        if (handle_client_delete_request(path) == 0) {
+            send(client_sock, ACK, strlen(ACK), 0);
+        } else {
+            send(client_sock, FAILED, strlen(FAILED), 0);
+        }
+    } 
+    else if (strcmp(operation, "INFO") == 0) {
+        char info_buffer[BUFFER_SIZE];
+        if (handle_client_info_request(path, info_buffer) == 0) {
+            send(client_sock, info_buffer, strlen(info_buffer), 0);
+            send(client_sock, ACK, strlen(ACK), 0);
+        } 
+        else {
+            send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
+        }
+    } 
+    else if (strcmp(operation, "STREAM") == 0) {
+        if (handle_client_stream_request(path, client_sock) == 0) {
+            send(client_sock, ACK, strlen(ACK), 0);
+        } else {
+            send(client_sock, NOT_FOUND, strlen(NOT_FOUND), 0);
+        }
+    }
+    else if (strcmp(operation, "LIST") == 0) {
+        handle_client_list_request(client_sock);
+        send(client_sock, ACK, strlen(ACK), 0);
+    }
+    else if (strcmp(operation, "ZIP") == 0) {
+        char* path = strtok(NULL, "\0");  // Rest of the buffer is the path
+        
+        // Call zip function
+        if (zip_path_and_send(path) == 0) {
+            send(client_sock, ACK, strlen(ACK), 0);
+        } else {
+            send(client_sock, FAILED, strlen(FAILED), 0);
+        }
+        
+    } 
+    else if (strcmp(operation, "UNZIP") == 0) {
+        char * input = strtok(NULL, " ");  // Get the destination path
+
+        // Call unzip function
+        if (unzip_received_data(input) == 0) {
+            send(client_sock, ACK, strlen(ACK), 0);
+        } else {
+            send(client_sock, FAILED, strlen(FAILED), 0);
+        }
+    }
+    else {
+        send(client_sock, FAILED, strlen(FAILED), 0);
+    }
+
+    close(client_sock);
+    free(client_socket_ptr);
+    return NULL;
+}

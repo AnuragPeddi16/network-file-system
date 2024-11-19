@@ -1,9 +1,12 @@
 #include "utils.h"
 #include "operations.h"
 
-extern StorageServerConfig config;
-
+StorageServerConfig config; // Global configuration variable, Declare in Utils.h
 int sock;
+
+// Global array to track file locks
+FileLock file_locks[MAX_CONCURRENT_FILES];
+pthread_mutex_t file_locks_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Register with Naming Server
 void register_with_naming_server() {
@@ -14,12 +17,12 @@ void register_with_naming_server() {
     inet_pton(AF_INET, config.nm_ip, &nm_addr.sin_addr);
 
     if (connect(sock, (struct sockaddr*)&nm_addr, sizeof(nm_addr)) < 0) {
-        perror("Registration connection failed");
+        log_message("Registration connection failed");
         return;
     }
 
     // Prepare registration message
-    char message[BUFFER_SIZE];
+    char message[BUFFER_SIZE+100];
     char paths_str[BUFFER_SIZE] = "";
     for (int i = 0; i < config.num_paths; i++) {
         strcat(paths_str, config.accessible_paths[i]);
@@ -27,12 +30,19 @@ void register_with_naming_server() {
     }
 
     //Format: REGISTER|<SS_PORT>:<PATH1>,<PATH2>,<PATH3>...
-    snprintf(message, sizeof(message), "REGISTER|%d:%s", config.ss_nm_port, paths_str);
+    snprintf(message, sizeof(message), "REGISTER|%d:%s", config.ss_client_port, paths_str);
     send(sock, message, strlen(message), 0);
+    //I can add IP here, if required
 
     char response[BUFFER_SIZE];
     recv(sock, response, sizeof(response), 0); //Waiting for Acknowledgement
-    printf("Naming Server Response: %s\n", response);
+    if(response[0] != '1'){
+        log_message("FAILED:Registration");
+        return;
+    }
+    else{
+        log_message("SUCCESS:Registration");
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -50,7 +60,7 @@ int main(int argc, char *argv[]) {
 
     //Error Check: Free Port
     if(config.ss_nm_port == -1 || config.ss_client_port == -1){
-        printf("Error: Unable to find free port\n");
+        log_message("Error: Unable to find free port");
         return 1;
     }
 
@@ -68,26 +78,28 @@ int main(int argc, char *argv[]) {
     server_addr.sin_port = htons(config.ss_client_port);
 
     if (bind(server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-        perror("Failed to bind socket");
+        log_message("Error: Failed to bind Client socket");
         return 1;
     }
 
     listen(server_sock, MAX_CLIENTS);
-    printf("Storage Server running on port %d\n", config.ss_client_port);
+    char * message;
+    asprintf(&message, "SUCCESS: Storage Server running on port Client_port %d", config.ss_client_port);
+    log_message(message);
 
     // Accept client connections and handle requests
     while (1) {
         int* client_sock = malloc(sizeof(int));
         *client_sock = accept(server_sock, NULL, NULL);
         if (*client_sock < 0) {
-            perror("Failed to accept client connection");
+            log_message("Failed to accept client connection");
             free(client_sock);
             continue;
         }
 
         pthread_t client_thread;
         if (pthread_create(&client_thread, NULL, handle_client_request, client_sock) != 0) {
-            perror("Failed to create thread");
+            log_message("Failed to create thread");
             close(*client_sock);
             free(client_sock);
         }

@@ -1,3 +1,4 @@
+// operations.h
 #ifndef OPERATIONS_H
 #define OPERATIONS_H
 
@@ -16,20 +17,13 @@
 #include <time.h>
 #include "utils.h"
 
-#define MAX_PATH_LENGTH 1024
-#define BUFFER_SIZE 4096
-#define MAX_ACCESSIBLE_PATHS 100
-
 // Status codes
 #define OK "0"
 #define ACK "1"
 #define NOT_FOUND "2"
 #define FAILED "3"
 #define SYNC_THRESHOLD 4096  // 4KB
-#define SEGMENT_SIZE 1024      // 1KB chunks for async writing
-
-//nm_sock
-extern int sock;
+#define SEGMENT_SIZE 1024    // 1KB chunks for async writing
 
 // Function prototypes
 void* handle_client_request(void* client_socket_ptr);
@@ -41,8 +35,6 @@ int handle_client_info_request(const char* path, char* info_buffer);
 int handle_client_stream_request(const char* path, int client_socket);
 int handle_client_list_request(int client_socket);
 int zip_path_and_send(const char* source_path);
-int unzip_received_data(const char* destination_path);
-
-
+int unzip_received_data(const char* input);
 
 #endif // OPERATIONS_H
