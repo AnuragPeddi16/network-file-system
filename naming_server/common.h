@@ -14,6 +14,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "../macros.h"
 #include "tries.h"

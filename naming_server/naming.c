@@ -116,13 +116,13 @@ void *accept_ss_connections(void *args) {
     get_local_ipv4_address(ip, INET_ADDRSTRLEN);
     printf("Naming server listening for storage servers on " YELLOW("port %d") " at " YELLOW("ip %s\n"), SS_PORT, ip);
 
-    int ss_fd;
-    struct sockaddr_in ss_addr;
-    socklen_t ss_addr_len = sizeof(ss_addr);
-
     printf(GREEN("Thread started:") " Waiting for incoming storage server connections...\n\n");
 
     while (1) {
+
+        int ss_fd;
+        struct sockaddr_in ss_addr;
+        socklen_t ss_addr_len = sizeof(ss_addr);
 
         ss_fd = accept(nm_fd, (struct sockaddr *)&ss_addr, &ss_addr_len);
         if (ss_fd < 0) {
@@ -195,13 +195,13 @@ void *accept_client_connections(void *args) {
     get_local_ipv4_address(ip, INET_ADDRSTRLEN);
     printf("Naming server listening for clients on " YELLOW("port %d") " at " YELLOW("ip %s\n"), CLIENT_PORT, ip);
 
-    int client_fd;
-    struct sockaddr_in client_addr;
-    socklen_t client_addr_len = sizeof(client_addr);
-
     printf(GREEN("Thread started:") " Waiting for incoming client connections...\n\n");
 
     while (1) {
+
+        int client_fd;
+        struct sockaddr_in client_addr;
+        socklen_t client_addr_len = sizeof(client_addr);
 
         client_fd = accept(nm_fd, (struct sockaddr *)&client_addr, &client_addr_len);
         if (client_fd < 0) {
@@ -234,6 +234,8 @@ void start_naming_server() {
 }
 
 int main() {
+
+    signal(SIGPIPE, SIG_IGN);
 
     pthread_mutex_init(&server_mutex, NULL);
     cache_init();

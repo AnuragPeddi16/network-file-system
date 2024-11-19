@@ -326,7 +326,7 @@ void *client_handler(void *client_sock_fd) {
         bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
         if (bytes_read < 0) {
 
-            if (errno == ECONNRESET || errno == ENOTCONN) break;
+            if (errno == ECONNRESET || errno == ENOTCONN || errno == EPIPE) break;
 
             print_error("Error reading from client");
             close(client_fd);
