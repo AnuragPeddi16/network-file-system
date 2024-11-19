@@ -1,4 +1,3 @@
-// main.c
 #include "client.h"
 #include <ctype.h>
 #include <stdio.h>
@@ -167,6 +166,7 @@ void execute_command(int argc, char** args) {
     else if (strcmp(cmd, "COPY") == 0) {
         if (argc != 3) {
             printf("Usage: COPY <source> <dest>\n");
+            
             return;
         }
         if (handle_copy_operation(args[1], args[2]) == 0) {

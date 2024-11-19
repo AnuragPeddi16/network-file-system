@@ -22,7 +22,7 @@
 #define MAX_ACCESSIBLE_PATHS 100
 #define MAX_PATH_LENGTH 1024
 #define MAX_CLIENTS 100
-#define NM_PORT 8080
+#define NM_PORT 8050
 #define MAX_CONCURRENT_FILES 100
 
 // Storage Server Configuration Structure

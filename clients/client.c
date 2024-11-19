@@ -31,7 +31,15 @@ ServerInfo get_storage_server_info(int naming_server_fd, const char* path, int o
     char request[BUFFER_SIZE];
     
     // Format request to naming server
-    snprintf(request, sizeof(request), "%d %s", operation, path);
+
+    //added
+    if (operation == 1)
+    {
+        snprintf(request, sizeof(request), "%s %s", "read", path); //operation send the name directy not the code 
+        printf("Request: %s\n", request);// test
+    }
+    
+    // snprintf(request, sizeof(request), "%d %s", operation, path); //operation send the name directy not the code
     
     // Send request to naming server
     if (send(naming_server_fd, request, strlen(request), 0) < 0) {
@@ -40,15 +48,15 @@ ServerInfo get_storage_server_info(int naming_server_fd, const char* path, int o
     }
 
     // Receive response
-    char response[BUFFER_SIZE] = {0};
-    if (recv(naming_server_fd, response, sizeof(response) - 1, 0) < 0) {
+    ServerInfo response;
+    if (recv(naming_server_fd, &response, sizeof(response) - 1, 0) < 0) {
         perror("Receive failed");
         return server_info;
     }
 
     // Parse response (expected format: "IP PORT")
-    sscanf(response, "%s %d", server_info.ip, &server_info.port);
-    return server_info;
+    // sscanf(&response, "%%s %d", server_info.ip, &server_info.port);
+    return response;
 }
 
 int handle_read_operation(const char* path) {
@@ -60,7 +68,7 @@ int handle_read_operation(const char* path) {
     ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_READ);
     close(naming_server_fd);
 
-    if (storage_server.port == 0) {
+    if (storage_server.status != 0) { //put other status code also
         printf("Failed to get storage server information\n");
         return -1;
     }

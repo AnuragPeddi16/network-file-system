@@ -10,7 +10,7 @@ int handle_client_write_request(const char* path, const char* data) {
     }
 
     // Acquire lock for this specific file
-    pthread_mutex_lock(&file_lock->mutex);
+    // pthread_mutex_lock(&file_lock->mutex);
 
     size_t data_size = strlen(data);
     
@@ -22,7 +22,7 @@ int handle_client_write_request(const char* path, const char* data) {
     FILE* file = fopen(path, "w");
     if (!file) {
         log_message("ERROR: Unable to open file for synchronous writing");
-        pthread_mutex_unlock(&file_lock->mutex);
+        // pthread_mutex_unlock(&file_lock->mutex);
         release_file_lock(file_lock);
         return -1;
     }
@@ -67,7 +67,7 @@ int handle_client_write_request(const char* path, const char* data) {
     fclose(file);
 
     // Release file-specific lock
-    pthread_mutex_unlock(&file_lock->mutex);
+    // pthread_mutex_unlock(&file_lock->mutex);
     release_file_lock(file_lock);
 
     if (write_result == 0) {

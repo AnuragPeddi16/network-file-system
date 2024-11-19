@@ -18,6 +18,7 @@ void register_with_naming_server() {
 
     if (connect(sock, (struct sockaddr*)&nm_addr, sizeof(nm_addr)) < 0) {
         log_message("Registration connection failed");
+        perror("Connection failed");
         return;
     }
 

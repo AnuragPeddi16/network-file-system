@@ -25,8 +25,9 @@
 #define OP_COPY 8
 
 // Structure to hold server information
-typedef struct {
-    char ip[16];
+typedef struct ServerInfo {
+    int status;
+    char ip[INET_ADDRSTRLEN];
     int port;
 } ServerInfo;
 
