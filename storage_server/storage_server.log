@@ -237,3 +237,10 @@
 ] FAILED:Registration
 [Tue Nov 19 23:20:16 2024
 ] SUCCESS: Storage Server running on port Client_port 39277
+[Tue Nov 19 23:44:41 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:44:41 2024
+] FAILED:Registration
+[Tue Nov 19 23:44:41 2024
+] SUCCESS: Storage Server running on port Client_port 38191
