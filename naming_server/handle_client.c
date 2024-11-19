@@ -320,59 +320,53 @@ void *client_handler(void *client_sock_fd) {
     char buffer[BUFFER_SIZE];
     int bytes_read;
 
-    while (1) {
+    // Read client request
+    bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
+    if (bytes_read < 0) {
 
-        // Read client request
-        bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
-        if (bytes_read < 0) {
+        print_error("Error reading from client");
+        close(client_fd);
+        return NULL;
 
-            if (errno == ECONNRESET || errno == ENOTCONN || errno == EPIPE) break;
+    }
+    buffer[bytes_read-1] = '\0';
 
-            print_error("Error reading from client");
-            close(client_fd);
-            return NULL;
+    printf("Received request from client: %s\n", buffer);
 
-        }
-        buffer[bytes_read-1] = '\0';
+    /*
+    
+    REQUEST FORMATS
 
-        printf("Received request from client: %s\n", buffer);
+    - READ <path>
+    - WRITE <path>
+    - INFO <path>
+    - STREAM <path>
+    - CREATE FILE/FOLDER <path>
+    - DELETE FILE/FOLDER <path>
+    - COPY FILE/FOLDER <path1> <path2>
+    - LIST
 
-        /*
-        
-        REQUEST FORMATS
+    */
 
-        - READ <path>
-        - WRITE <path>
-        - INFO <path>
-        - STREAM <path>
-        - CREATE FILE/FOLDER <path>
-        - DELETE FILE/FOLDER <path>
-        - COPY FILE/FOLDER <path1> <path2>
-        - LIST
-
-        */
-
-        // Determine request type
-        if (strncmp(buffer, "READ", 4) == 0) {
-            handle_read_request(client_fd, buffer + 5); // Pass the file path
-        } else if (strncmp(buffer, "WRITE", 5) == 0) {
-            handle_write_request(client_fd, buffer + 6); // Pass the file path
-        } else if (strncmp(buffer, "INFO", 4) == 0) {
-            handle_info_request(client_fd, buffer + 5); // Pass the file path
-        } else if (strncmp(buffer, "STREAM", 6) == 0) {
-            handle_stream_request(client_fd, buffer + 7); // Pass the file path
-        } else if (strncmp(buffer, "CREATE", 6) == 0) {
-            handle_create_request(client_fd, buffer, buffer + 7); // Pass the file path
-        } else if (strncmp(buffer, "DELETE", 6) == 0) {
-            handle_delete_request(client_fd, buffer, buffer + 7); // Pass the file path
-        } else if (strncmp(buffer, "COPY", 4) == 0) {
-            handle_copy_request(client_fd, buffer + 5); // Pass source and destination paths
-        } else if (strncmp(buffer, "LIST", 4) == 0) {
-            handle_list_request(client_fd);
-        } else {
-            if (send(client_fd, "Unknown command", strlen("Unknown command"), 0) < 0) print_error("sending invalid command error failed");
-        }
-
+    // Determine request type
+    if (strncmp(buffer, "READ", 4) == 0) {
+        handle_read_request(client_fd, buffer + 5); // Pass the file path
+    } else if (strncmp(buffer, "WRITE", 5) == 0) {
+        handle_write_request(client_fd, buffer + 6); // Pass the file path
+    } else if (strncmp(buffer, "INFO", 4) == 0) {
+        handle_info_request(client_fd, buffer + 5); // Pass the file path
+    } else if (strncmp(buffer, "STREAM", 6) == 0) {
+        handle_stream_request(client_fd, buffer + 7); // Pass the file path
+    } else if (strncmp(buffer, "CREATE", 6) == 0) {
+        handle_create_request(client_fd, buffer, buffer + 7); // Pass the file path
+    } else if (strncmp(buffer, "DELETE", 6) == 0) {
+        handle_delete_request(client_fd, buffer, buffer + 7); // Pass the file path
+    } else if (strncmp(buffer, "COPY", 4) == 0) {
+        handle_copy_request(client_fd, buffer + 5); // Pass source and destination paths
+    } else if (strncmp(buffer, "LIST", 4) == 0) {
+        handle_list_request(client_fd);
+    } else {
+        if (send(client_fd, "Unknown command", strlen("Unknown command"), 0) < 0) print_error("sending invalid command error failed");
     }
 
     printf("Client connection %d closed.\n", client_fd);
