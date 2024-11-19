@@ -157,6 +157,13 @@ void *accept_ss_connections(void *args) {
         sscanf(buffer+9, "%d:%[^\n]", &client_port, paths);
 
         add_storage_server(ss_fd, inet_ntoa(ss_addr.sin_addr), ntohs(ss_addr.sin_port), client_port, paths);
+
+        int ack = htonl(ACK);
+        if (send(ss_fd, &ack, sizeof(ack), 0) < 0) {
+
+            print_error("sending ack to ss failed");
+
+        }
         
     }
 
