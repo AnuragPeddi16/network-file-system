@@ -64,3 +64,25 @@ void completeFree(char** arr) {
     free(arr);
 
 }
+
+int is_socket_connected(int sock_fd) {
+    char buffer;
+    ssize_t result = recv(sock_fd, &buffer, 1, MSG_PEEK | MSG_DONTWAIT);
+    
+    if (result > 0) {
+        // Data is available; the socket is still connected.
+        return 1;
+    } else if (result == 0) {
+        // Connection has been closed by the peer.
+        return 0;
+    } else {
+        // Check for specific errors.
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            // No data available, but the socket is still connected.
+            return 1;
+        } else {
+            // An error occurred, socket is likely disconnected.
+            return 0;
+        }
+    }
+}

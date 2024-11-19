@@ -1,16 +1,12 @@
-[19-11-2024 23:40:47] Naming server listening for clients on port 8051 at ip 10.255.255.254
+[20-11-2024 00:53:02] Naming server listening for clients on port 8051 at ip 10.255.255.254
 
-[19-11-2024 23:40:47] Naming server listening for storage servers on port 8050 at ip 10.255.255.254
+[20-11-2024 00:53:02] Naming server listening for storage servers on port 8050 at ip 10.255.255.254
 
-[19-11-2024 23:41:11] Received server connection...
-[19-11-2024 23:41:18] Storage server added: IP 10.255.255.254, Port 53254
+[20-11-2024 00:53:20] Received server connection...
+[20-11-2024 00:53:20] Storage server added: IP 127.0.0.1, Port 34428
 
-[19-11-2024 23:41:33] Accepted client connection 4
-[19-11-2024 23:41:40] Received request from client: READ a/c.txt
+[20-11-2024 00:53:25] Accepted client connection 6
+[20-11-2024 00:53:27] Received request from client: LIST
 
-[19-11-2024 23:41:40] Sent response to client 4: IP 10.255.255.254 and port 54678 with status 0
-[19-11-2024 23:41:40] Client connection 4 closed.
-
-[19-11-2024 23:42:06] Accepted client connection 8
-[19-11-2024 23:42:13] Received request from client: CREATE b/new.txt
+[20-11-2024 00:53:27] Client connection 6 closed.
 

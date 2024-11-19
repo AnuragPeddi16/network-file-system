@@ -15,6 +15,7 @@
 #include <netdb.h>
 #include <errno.h>
 #include <signal.h>
+#include <poll.h>
 
 #include "../macros.h"
 #include "tries.h"
@@ -33,6 +34,7 @@
 // Structure to store metadata about storage servers
 typedef struct {
     int fd; // active connection
+    bool active;
     char ip[INET_ADDRSTRLEN];
     int nm_port;
     int client_port;
@@ -56,5 +58,6 @@ void print_error(char* message);
 char* str_before_last_slash(char* str);
 char** tokenize(char* string, char* delimiters);
 void completeFree(char** arr);
+int is_socket_connected(int sock_fd);
 
 #endif

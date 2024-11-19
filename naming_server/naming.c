@@ -62,6 +62,7 @@ bool add_storage_server(int fd, const char *ip, int nm_port, int client_port, ch
     }
 
     storage_servers[server_count].fd = fd;
+    storage_servers[server_count].active = true;
     strncpy(storage_servers[server_count].ip, ip, INET_ADDRSTRLEN);
     storage_servers[server_count].nm_port = nm_port;
     storage_servers[server_count].client_port = client_port;
@@ -274,7 +275,7 @@ int main() {
     cache_init();
 
     start_naming_server();
-    
+
     cache_cleanup();
 
     pthread_mutex_destroy(&server_mutex);

@@ -58,6 +58,12 @@ void insert_path_trie(TrieNode *root, char *path) {
 
             free(path_component);
             return;
+
+        } else if (child == NULL) {
+
+            fprintf(stderr, "Invalid file path: %s\n", path);
+            return;
+
         }
 
         free(path_component);
