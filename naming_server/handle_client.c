@@ -315,7 +315,7 @@ void handle_copy_request(int client_fd, char *paths) {
     } else file_path = paths + 7;
 
     // Parse paths to extract source and destination paths
-    char *source_path = strtok(paths, " ");
+    char *source_path = strtok(file_path, " ");
     char *destination_path = strtok(NULL, " ");
 
     if (source_path == NULL || destination_path == NULL) {
