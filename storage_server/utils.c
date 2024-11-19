@@ -46,8 +46,8 @@ void parse_paths(char* paths_arg) {
         strcat(check_path,trimmed_path);
 
         if (access(check_path, F_OK) != 0) { // Check if path exists Relative Path too!
-            char* message;
-            asprintf(&message, "Error: Path '%s' does not exist", trimmed_path);
+            char message[BUFFER_SIZE];
+            sprintf(message, "Error: Path '%s' does not exist", trimmed_path);
             log_message(message);
             path_token = strtok(NULL, ",");
             continue;
@@ -59,8 +59,8 @@ void parse_paths(char* paths_arg) {
         // Get next path
         path_token = strtok(NULL, ",");
     }
-    char* message;
-    asprintf(&message, "SUCCESS: Discovered %d paths:\n", config.num_paths);
+    char message[BUFFER_SIZE];
+    sprintf(message, "SUCCESS: Discovered %d paths:\n", config.num_paths);
     pthread_mutex_unlock(&config.config_mutex);
     log_message(message);
 }
@@ -164,10 +164,12 @@ void initialize_file_locks() {
 
 // Function to get or create a lock for a specific file
 FileLock* get_file_lock(const char* filename) {
+    // printf("Getting file lock for %s\n", filename);
     pthread_mutex_lock(&file_locks_mutex);
     
     pthread_mutex_lock(&config.config_mutex);
     for (int i = 0; i < config.num_paths; i++) {
+        // printf("Found existing lock for %s %s\n", filename, file_locks[i].filename);
         if (strcmp(file_locks[i].filename, filename) == 0) {
             file_locks[i].ref_count++;
             pthread_mutex_unlock(&config.config_mutex);

@@ -169,7 +169,7 @@ int handle_read_operation(const char *path)
 
     // Send read request
     char request[BUFFER_SIZE];
-    snprintf(request, sizeof(request), "READ %s\n", path);
+    snprintf(request, sizeof(request), "READ %s", path);
     send(storage_fd, request, strlen(request), 0);
 
     // Receive and display file content
@@ -190,17 +190,39 @@ int handle_read_operation(const char *path)
 int handle_write_operation(const char *path, const char *content)
 {
     // Similar structure to read operation but sends content to storage server
-    int naming_server_fd = connect_to_server("localhost", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
     ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_WRITE);
     close(naming_server_fd);
 
-    if (storage_server.port == 0)
-    {
-        printf("Failed to get storage server information\n");
-        return -1;
+    // if (storage_server.port == 0)
+    // {
+    //     printf("Failed to get storage server information\n");
+    //     return -1;
+    // }
+    switch(storage_server.status) {
+        case OK:
+            printf(GREEN("STATUS CODE : OK\n"));
+            break;
+        case ACK:
+            printf(YELLOW("STATUS CODE : ACK\n"));
+            break;
+        case NOT_FOUND:
+            printf(RED("STATUS CODE : NOT_FOUND\n"));
+            break;
+        case FAILED:
+            printf(MAGENTA("STATUS CODE : FAILED\n"));
+            break;
+        case ASYNCHRONOUS_COMPLETE:
+            printf(CYAN("STATUS CODE : ASYNCHRONOUS_COMPLETE\n"));
+            break;
+        default:
+            printf("Unknown operation\n");
+            storage_server.status = -1;
+            // return storage_server;
+
     }
 
     int storage_fd = connect_to_server(storage_server.ip, storage_server.port);
@@ -222,7 +244,7 @@ int handle_write_operation(const char *path, const char *content)
 
 int handle_stream_operation(const char *path)
 {
-    int naming_server_fd = connect_to_server("localhost", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -267,41 +289,61 @@ int handle_stream_operation(const char *path)
     return 0;
 }
 
+//talk only to ns
 int handle_create_operation(const char *path, const char *name)
 {
-    int naming_server_fd = connect_to_server("localhost", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
     ServerInfo storage_server = get_storage_server_info(naming_server_fd, path, OP_CREATE);
-    close(naming_server_fd);
 
-    if (storage_server.port == 0)
+    if (storage_server.status == 1)
     {
-        printf("Failed to get storage server information\n");
-        return -1;
+        printf(GREEN("File/Folder created normally\n"));
+    }
+    else if (storage_server.status == 3)
+    {
+        printf(MAGENTA("File/Folder create failed\n"));
+    }
+    else
+    {
+        printf(RED("creating unknown error\n"));
     }
 
-    int storage_fd = connect_to_server(storage_server.ip, storage_server.port);
-    if (storage_fd < 0)
-        return -1;
+    
+    
+    close(naming_server_fd);
 
-    // Send create request
-    char request[BUFFER_SIZE];
-    snprintf(request, sizeof(request), "CREATE %s %s", path, name);
-    send(storage_fd, request, strlen(request), 0);
+    // if (storage_server.port == 0)
+    // {
+    //     printf("Failed to get storage server information\n");
+    //     return -1;
+    // }
 
-    // Wait for acknowledgment
-    char response[BUFFER_SIZE] = {0};
-    recv(storage_fd, response, sizeof(response) - 1, 0);
+   
 
-    close(storage_fd);
-    return (strstr(response, "SUCCESS") != NULL) ? 0 : -1;
+    // int storage_fd = connect_to_server(storage_server.ip, storage_server.port);
+    // if (storage_fd < 0)
+    //     return -1;
+
+    // // Send create request
+    // char request[BUFFER_SIZE];
+    // snprintf(request, sizeof(request), "CREATE %s %s", path, name);
+    // send(storage_fd, request, strlen(request), 0);
+
+    // // Wait for acknowledgment
+    // char response[BUFFER_SIZE] = {0};
+    // recv(storage_fd, response, sizeof(response) - 1, 0);
+
+    // close(storage_fd);
+    // return (strstr(response, "SUCCESS") != NULL) ? 0 : -1;
+    return 0;
 }
 
 int handle_delete_operation(const char *path)
 {
-    int naming_server_fd = connect_to_server("localhost", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -333,7 +375,7 @@ int handle_delete_operation(const char *path)
 
 int handle_list_operation(const char *path)
 {
-    int naming_server_fd = connect_to_server("localhost", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -372,7 +414,7 @@ int handle_list_operation(const char *path)
 
 int handle_copy_operation(const char *source, const char *dest)
 {
-    int naming_server_fd = connect_to_server("localhost", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 

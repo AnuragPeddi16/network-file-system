@@ -99,10 +99,10 @@ int main(int argc, char *argv[]) {
     }
 
     listen(server_sock, MAX_CLIENTS);
-    char * message;
+    char message[BUFFER_SIZE];
 
     pthread_mutex_lock(&config.config_mutex);
-    asprintf(&message, "SUCCESS: Storage Server running on port Client_port %d", config.ss_client_port);
+    sprintf(message, "SUCCESS: Storage Server running on port Client_port %d", config.ss_client_port);
     pthread_mutex_unlock(&config.config_mutex);
     
     log_message(message);

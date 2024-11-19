@@ -88,3 +88,152 @@
 [Tue Nov 19 22:31:44 2024
 ] SUCCESS: Discovered 1 paths:
 
+[Tue Nov 19 22:37:03 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 22:37:03 2024
+] FAILED:Registration
+[Tue Nov 19 22:37:03 2024
+] SUCCESS: Storage Server running on port Client_port 37887
+[Tue Nov 19 22:45:36 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 22:45:36 2024
+] FAILED:Registration
+[Tue Nov 19 22:45:36 2024
+] SUCCESS: Storage Server running on port Client_port 39231
+[Tue Nov 19 22:46:45 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 22:46:45 2024
+] FAILED:Registration
+[Tue Nov 19 22:46:45 2024
+] SUCCESS: Storage Server running on port Client_port 47241
+[Tue Nov 19 22:50:55 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 22:50:55 2024
+] FAILED:Registration
+[Tue Nov 19 22:50:55 2024
+] SUCCESS: Storage Server running on port Client_port 54147
+[Tue Nov 19 22:52:54 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 22:52:54 2024
+] FAILED:Registration
+[Tue Nov 19 22:52:54 2024
+] SUCCESS: Storage Server running on port Client_port 57501
+[Tue Nov 19 22:54:00 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 22:54:00 2024
+] FAILED:Registration
+[Tue Nov 19 22:54:00 2024
+] SUCCESS: Storage Server running on port Client_port 55295
+[Tue Nov 19 22:56:28 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 22:56:28 2024
+] FAILED:Registration
+[Tue Nov 19 22:56:28 2024
+] SUCCESS: Storage Server running on port Client_port 38289
+[Tue Nov 19 22:56:44 2024
+] Read Request: Path=./a/try.c
+[Tue Nov 19 22:56:44 2024
+] READ SUCCESS
+[Tue Nov 19 23:07:08 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:07:08 2024
+] FAILED:Registration
+[Tue Nov 19 23:07:08 2024
+] SUCCESS: Storage Server running on port Client_port 42799
+[Tue Nov 19 23:07:36 2024
+] Read Request: Path=./a/old.c
+[Tue Nov 19 23:07:36 2024
+] READ SUCCESS
+[Tue Nov 19 23:07:54 2024
+] Read Request: Path=./a/try.c
+[Tue Nov 19 23:07:54 2024
+] READ SUCCESS
+[Tue Nov 19 23:10:37 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:10:37 2024
+] FAILED:Registration
+[Tue Nov 19 23:10:37 2024
+] SUCCESS: Storage Server running on port Client_port 45393
+[Tue Nov 19 23:11:48 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:11:48 2024
+] FAILED:Registration
+[Tue Nov 19 23:11:48 2024
+] SUCCESS: Storage Server running on port Client_port 52205
+[Tue Nov 19 23:12:28 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:12:28 2024
+] FAILED:Registration
+[Tue Nov 19 23:12:28 2024
+] SUCCESS: Storage Server running on port Client_port 53995
+[Tue Nov 19 23:12:54 2024
+] Read Request: Path=./a/old.c
+[Tue Nov 19 23:12:54 2024
+] READ SUCCESS
+[Tue Nov 19 23:16:31 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:16:31 2024
+] FAILED:Registration
+[Tue Nov 19 23:16:31 2024
+] SUCCESS: Storage Server running on port Client_port 56667
+[Tue Nov 19 23:16:36 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:16:36 2024
+] FAILED:Registration
+[Tue Nov 19 23:16:36 2024
+] SUCCESS: Storage Server running on port Client_port 52479
+[Tue Nov 19 23:18:53 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:18:53 2024
+] FAILED:Registration
+[Tue Nov 19 23:18:53 2024
+] SUCCESS: Storage Server running on port Client_port 56609
+[Tue Nov 19 23:19:33 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:19:33 2024
+] FAILED:Registration
+[Tue Nov 19 23:19:33 2024
+] SUCCESS: Storage Server running on port Client_port 49925
+[Tue Nov 19 23:19:40 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:19:40 2024
+] FAILED:Registration
+[Tue Nov 19 23:19:40 2024
+] SUCCESS: Storage Server running on port Client_port 53539
+[Tue Nov 19 23:19:46 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:19:46 2024
+] FAILED:Registration
+[Tue Nov 19 23:19:46 2024
+] SUCCESS: Storage Server running on port Client_port 59743
+[Tue Nov 19 23:20:11 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:20:11 2024
+] FAILED:Registration
+[Tue Nov 19 23:20:11 2024
+] SUCCESS: Storage Server running on port Client_port 45093
+[Tue Nov 19 23:20:16 2024
+] SUCCESS: Discovered 4 paths:
+
+[Tue Nov 19 23:20:16 2024
+] FAILED:Registration
+[Tue Nov 19 23:20:16 2024
+] SUCCESS: Storage Server running on port Client_port 39277
