@@ -246,6 +246,8 @@ void handle_create_request(int client_fd, char* request, char *path) {
     sprintf(message, "Received ack with status %d\n\n", status);
     log_message(message);
 
+    if (strncmp(path, "FILE", 4) != 0) strcat(file_path, "/");
+
     if (status == ACK) insert_path_trie(ss->paths_root, file_path);
     free(file_path);
 
