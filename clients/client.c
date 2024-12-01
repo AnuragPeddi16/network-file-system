@@ -13,6 +13,7 @@ int connect_to_server(const char *ip, int port)
 
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
+    
     server_addr.sin_port = htons(port);
 
     if (inet_pton(AF_INET, ip, &server_addr.sin_addr) <= 0)
@@ -127,7 +128,7 @@ ServerInfo get_storage_server_info(int naming_server_fd, const char *path, int o
 int handle_read_operation(const char *path)
 {
     // Connect to naming server
-    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server(IP, NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -193,7 +194,7 @@ int handle_read_operation(const char *path)
 int handle_write_operation(const char *path, const char *content)
 {
     // Similar structure to read operation but sends content to storage server
-    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server(IP, NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -299,7 +300,7 @@ int handle_write_operation(const char *path, const char *content)
 
 int handle_stream_operation(const char *path)
 {
-    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server(IP, NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -346,7 +347,7 @@ int handle_stream_operation(const char *path)
 int handle_info_operation(const char *path)
 {
     // Connect to naming server
-    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server(IP, NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -413,7 +414,7 @@ int handle_info_operation(const char *path)
 //talk only to ns
 int handle_create_operation(const char *dir, const char *path)
 {
-    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server(IP, NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -470,7 +471,7 @@ int handle_create_operation(const char *dir, const char *path)
 
 int handle_delete_operation(const char *dir, const char *path)
 {
-    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server(IP, NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -538,7 +539,7 @@ int handle_delete_operation(const char *dir, const char *path)
 
 int handle_list_operation()
 {
-    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server(IP, NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 
@@ -607,7 +608,7 @@ int handle_list_operation()
 
 int handle_copy_operation(const char* dir, const char *source, const char *dest)
 {
-    int naming_server_fd = connect_to_server("127.0.0.1", NAMING_SERVER_PORT);
+    int naming_server_fd = connect_to_server(IP, NAMING_SERVER_PORT);
     if (naming_server_fd < 0)
         return -1;
 

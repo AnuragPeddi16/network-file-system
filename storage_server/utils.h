@@ -32,8 +32,9 @@ typedef struct {
     int nm_port;
     int ss_nm_port;     // Port for Naming Server connections
     int ss_client_port; // Port for client connections
-    char accessible_paths[MAX_ACCESSIBLE_PATHS][BUFFER_SIZE];
+    char accessible_paths[MAX_ACCESSIBLE_PATHS][MAX_PATH_LENGTH+5];
     int num_paths;
+    char base_path[MAX_PATH_LENGTH];
     pthread_mutex_t config_mutex;
 } StorageServerConfig;
 

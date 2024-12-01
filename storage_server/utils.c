@@ -17,12 +17,84 @@ char* trim_whitespace(char* str) {
     return str;
 }
 
+// Function to recursively list files and directories
+int listFilesRecursive(const char *basePath, const char *relativePath, char buffer[MAX_ACCESSIBLE_PATHS][MAX_PATH_LENGTH+5], int *index) {
+    struct dirent *entry;
+    DIR *dir;
+
+    // Construct the full path for the current directory
+    char fullPath[MAX_PATH_LENGTH];
+    snprintf(fullPath, sizeof(fullPath), "%s/%s", basePath, relativePath);
+
+    dir = opendir(fullPath);
+    if (!dir) {
+        perror("opendir");
+        return -1; // Return error if directory can't be opened
+    }
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue; // Skip current and parent directories
+        }
+
+        // Construct the relative path for the current entry
+        char newRelativePath[MAX_PATH_LENGTH];
+        snprintf(newRelativePath, sizeof(newRelativePath), "%s%s%s", relativePath, *relativePath ? "/" : "", entry->d_name);
+
+        // Check if the entry is a directory
+        struct stat entryStat;
+        char fullEntryPath[MAX_PATH_LENGTH*2];
+        snprintf(fullEntryPath, sizeof(fullEntryPath), "%s/%s", fullPath, entry->d_name);
+
+        if (stat(fullEntryPath, &entryStat) == 0 && S_ISDIR(entryStat.st_mode)) {
+            // Add a slash to directories
+            if (*index < MAX_ACCESSIBLE_PATHS) {
+                snprintf(buffer[*index], MAX_PATH_LENGTH+5, "%s/", newRelativePath);
+                (*index)++;
+            } else {
+                fprintf(stderr, "Buffer overflow: too many files.\n");
+                closedir(dir);
+                return -1;
+            }
+            // Recursively list the contents of the subdirectory
+            if (listFilesRecursive(basePath, newRelativePath, buffer, index) == -1) {
+                closedir(dir);
+                return -1;
+            }
+        } else {
+            // Add files to the buffer
+            if (*index < MAX_ACCESSIBLE_PATHS) {
+                strncpy(buffer[*index], newRelativePath, MAX_PATH_LENGTH - 1);
+                buffer[*index][MAX_PATH_LENGTH - 1] = '\0'; // Ensure null termination
+                (*index)++;
+            } else {
+                fprintf(stderr, "Buffer overflow: too many files.\n");
+                closedir(dir);
+                return -1;
+            }
+        }
+    }
+
+    closedir(dir);
+    return 0;
+}
+
 // Parsing function
 void parse_paths(char* paths_arg) {
     pthread_mutex_lock(&config.config_mutex);
     config.num_paths = 0;
 
-    // Use a copy of the argument to avoid modifying original
+    strcpy(config.base_path, paths_arg);
+    if (config.base_path[strlen(config.base_path)] != '/') strcat(config.base_path, "/");
+
+    if (listFilesRecursive(paths_arg, "", config.accessible_paths, &config.num_paths) < 0) {
+
+        fprintf(stderr, "Could not add paths: An error occured. Aborting.\n");
+        exit(1);
+
+    }
+
+    /* // Use a copy of the argument to avoid modifying original
     char paths_copy[BUFFER_SIZE];
     strncpy(paths_copy, paths_arg, sizeof(paths_copy) - 1);
     paths_copy[sizeof(paths_copy) - 1] = '\0'; // Ensure null-terminated
@@ -58,7 +130,9 @@ void parse_paths(char* paths_arg) {
 
         // Get next path
         path_token = strtok(NULL, ",");
-    }
+    } */
+
+
     char message[BUFFER_SIZE];
     sprintf(message, "SUCCESS: Discovered %d paths:\n", config.num_paths);
     pthread_mutex_unlock(&config.config_mutex);

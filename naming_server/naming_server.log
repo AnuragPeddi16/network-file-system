@@ -1,13 +1,30 @@
-[20-11-2024 05:17:27] Naming server listening for clients on port 8051 at ip 10.1.131.145
+[01-12-2024 12:59:40] Naming server listening for clients on port 8051 at ip 10.255.255.254
 
-[20-11-2024 05:17:27] Naming server listening for storage servers on port 8050 at ip 10.1.131.145
+[01-12-2024 12:59:40] Naming server listening for storage servers on port 8050 at ip 10.255.255.254
 
-[20-11-2024 05:17:29] Received server connection...
-[20-11-2024 05:17:29] Storage server added: IP 127.0.0.1, Port 40136
+[01-12-2024 12:59:43] Received server connection...
+[01-12-2024 12:59:43] Storage server added: IP 127.0.0.1, Port 59072
 
-[20-11-2024 05:17:54] Accepted client connection 4
-[20-11-2024 05:17:54] Received request from client: WRITE a/try.c (null)
+[01-12-2024 12:59:49] Accepted client connection 6
+[01-12-2024 12:59:49] Received request from client: LIST
 
-[20-11-2024 05:17:54] Sent response to client 4: IP 127.0.0.1 and port 51951 with status 0
-[20-11-2024 05:17:54] Client connection 4 closed.
+[01-12-2024 12:59:49] Client connection 6 closed.
+
+[01-12-2024 13:00:01] Accepted client connection 8
+[01-12-2024 13:00:01] Received request from client: WRITE a/newfile.txt (null)
+
+[01-12-2024 13:00:01] Sent response to client 8: IP 127.0.0.1 and port 33545 with status 0
+[01-12-2024 13:00:01] Client connection 8 closed.
+
+[01-12-2024 13:02:47] Accepted client connection 6
+[01-12-2024 13:02:47] Received request from client: READ Makefile
+
+[01-12-2024 13:02:47] Sent response to client 6: IP 127.0.0.1 and port 33545 with status 0
+[01-12-2024 13:02:47] Client connection 6 closed.
+
+[01-12-2024 13:03:36] Accepted client connection 8
+[01-12-2024 13:03:36] Received request from client: STREAM b/coldplay.mp3
+
+[01-12-2024 13:03:36] Sent response to client 8: IP 127.0.0.1 and port 33545 with status 0
+[01-12-2024 13:03:36] Client connection 8 closed.
 

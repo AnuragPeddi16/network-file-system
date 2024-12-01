@@ -915,3 +915,227 @@ int handle_client_write_request(const char* upath, const char* data) {
 ] Write Request: Path=./a/try.c, Size=156 bytes
 [Wed Nov 20 05:17:54 2024
 ] WRITE SUCCESS: Path=./a/try.c, Size=156 bytes
+[Wed Nov 20 05:20:08 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:20:08 2024
+] SUCCESS:Registration
+[Wed Nov 20 05:20:08 2024
+] SUCCESS: Storage Server running on port Client_port 47035
+[Wed Nov 20 05:21:27 2024
+] CREATE FILE b/z.c
+[Wed Nov 20 05:21:27 2024
+] Create Request:FILE Path=b/z.c
+[Wed Nov 20 05:21:27 2024
+] File created
+[Wed Nov 20 05:22:16 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:22:16 2024
+] SUCCESS:Registration
+[Wed Nov 20 05:22:16 2024
+] SUCCESS: Storage Server running on port Client_port 45765
+[Wed Nov 20 05:22:34 2024
+] CREATE FOLDER a/gf/
+[Wed Nov 20 05:22:34 2024
+] Create Request:FOLDER Path=a/gf/
+[Wed Nov 20 05:22:34 2024
+] Folder created
+[Wed Nov 20 05:39:49 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:41:45 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:42:53 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:42:53 2024
+] Registration connection failed
+[Wed Nov 20 05:42:53 2024
+] SUCCESS: Storage Server running on port Client_port 53177
+[Wed Nov 20 05:43:09 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:43:09 2024
+] Registration connection failed
+[Wed Nov 20 05:43:09 2024
+] SUCCESS: Storage Server running on port Client_port 46023
+[Wed Nov 20 05:43:20 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:43:20 2024
+] Registration connection failed
+[Wed Nov 20 05:43:20 2024
+] SUCCESS: Storage Server running on port Client_port 35267
+[Wed Nov 20 05:43:24 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:43:24 2024
+] Registration connection failed
+[Wed Nov 20 05:43:24 2024
+] SUCCESS: Storage Server running on port Client_port 60345
+[Wed Nov 20 05:44:40 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:45:43 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:45:51 2024
+] SUCCESS: Discovered 5 paths:
+
+[Wed Nov 20 05:45:51 2024
+] Registration connection failed
+[Wed Nov 20 05:45:51 2024
+] SUCCESS: Storage Server running on port Client_port 56739
+[Sun Dec  1 00:54:47 2024
+] Error: Path 'b/a.txt' does not exist
+[Sun Dec  1 00:54:47 2024
+] SUCCESS: Discovered 1 paths:
+
+[Sun Dec  1 00:54:47 2024
+] SUCCESS:Registration
+[Sun Dec  1 00:54:47 2024
+] SUCCESS: Storage Server running on port Client_port 50439
+[Sun Dec  1 00:55:30 2024
+] READ b/
+[Sun Dec  1 00:55:30 2024
+] Read Request: Path=./b/
+[Sun Dec  1 00:55:30 2024
+] READ SUCCESS
+[Sun Dec  1 00:56:28 2024
+] SUCCESS: Discovered 4 paths:
+
+[Sun Dec  1 00:56:28 2024
+] SUCCESS:Registration
+[Sun Dec  1 00:56:28 2024
+] SUCCESS: Storage Server running on port Client_port 47015
+[Sun Dec  1 00:56:38 2024
+] READ a/a.c
+[Sun Dec  1 00:56:38 2024
+] Read Request: Path=./a/a.c
+[Sun Dec  1 00:56:38 2024
+] READ SUCCESS
+[Sun Dec  1 00:56:57 2024
+] READ b/y.c
+[Sun Dec  1 00:56:57 2024
+] Read Request: Path=./b/y.c
+[Sun Dec  1 00:56:57 2024
+] READ SUCCESS
+[Sun Dec  1 00:57:21 2024
+] SUCCESS: Discovered 4 paths:
+
+[Sun Dec  1 00:57:21 2024
+] SUCCESS:Registration
+[Sun Dec  1 00:57:21 2024
+] SUCCESS: Storage Server running on port Client_port 51335
+[Sun Dec  1 00:57:29 2024
+] READ a/old.c
+[Sun Dec  1 00:57:29 2024
+] Read Request: Path=./a/old.c
+[Sun Dec  1 01:05:00 2024
+] SUCCESS: Discovered 4 paths:
+
+[Sun Dec  1 01:05:00 2024
+] SUCCESS:Registration
+[Sun Dec  1 01:05:00 2024
+] SUCCESS: Storage Server running on port Client_port 51609
+[Sun Dec  1 01:05:19 2024
+] WRITE b/y.c hello world
+[Sun Dec  1 01:05:19 2024
+] Write Request: Path=./b/y.c, Size=11 bytes
+[Sun Dec  1 01:05:19 2024
+] WRITE SUCCESS: Path=./b/y.c, Size=11 bytes
+[Sun Dec  1 01:06:53 2024
+] WRITE b/y.c hello world
+[Sun Dec  1 01:06:53 2024
+] Write Request: Path=./b/y.c, Size=11 bytes
+[Sun Dec  1 01:06:53 2024
+] WRITE SUCCESS: Path=./b/y.c, Size=11 bytes
+[Sun Dec  1 01:07:01 2024
+] READ b/y.c
+[Sun Dec  1 01:07:01 2024
+] Read Request: Path=./b/y.c
+[Sun Dec  1 01:07:01 2024
+] READ SUCCESS
+[Sun Dec  1 01:07:43 2024
+] WRITE b/y.c hello world\n
+[Sun Dec  1 01:08:10 2024
+] SUCCESS: Discovered 4 paths:
+
+[Sun Dec  1 01:08:10 2024
+] FAILED:Registration
+[Sun Dec  1 01:08:10 2024
+] SUCCESS: Storage Server running on port Client_port 55743
+[Sun Dec  1 01:08:22 2024
+] SUCCESS: Discovered 4 paths:
+
+[Sun Dec  1 01:08:22 2024
+] SUCCESS:Registration
+[Sun Dec  1 01:08:22 2024
+] SUCCESS: Storage Server running on port Client_port 59057
+[Sun Dec  1 01:08:37 2024
+] WRITE b/y.c hello world 
+[Sun Dec  1 01:08:37 2024
+] Write Request: Path=./b/y.c, Size=12 bytes
+[Sun Dec  1 01:08:37 2024
+] WRITE SUCCESS: Path=./b/y.c, Size=12 bytes
+[Sun Dec  1 01:08:42 2024
+] READ b/y.c
+[Sun Dec  1 01:08:42 2024
+] Read Request: Path=./b/y.c
+[Sun Dec  1 01:08:42 2024
+] READ SUCCESS
+[Sun Dec  1 01:09:35 2024
+] WRITE b/y.c aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+[Sun Dec  1 12:50:33 2024
+] SUCCESS: Discovered 21 paths:
+
+[Sun Dec  1 12:50:33 2024
+] SUCCESS:Registration
+[Sun Dec  1 12:50:33 2024
+] SUCCESS: Storage Server running on port Client_port 43387
+[Sun Dec  1 12:51:05 2024
+] READ a/old.c
+[Sun Dec  1 12:51:05 2024
+] Read Request: Path=../storage_servera/old.c
+[Sun Dec  1 12:51:05 2024
+] ERROR: Unable to open file for Reading
+[Sun Dec  1 12:53:35 2024
+] SUCCESS: Discovered 21 paths:
+
+[Sun Dec  1 12:53:35 2024
+] SUCCESS:Registration
+[Sun Dec  1 12:53:35 2024
+] SUCCESS: Storage Server running on port Client_port 57751
+[Sun Dec  1 12:53:47 2024
+] READ a/old.c
+[Sun Dec  1 12:53:47 2024
+] Read Request: Path=../storage_server/a/old.c
+[Sun Dec  1 12:53:47 2024
+] READ SUCCESS
+[Sun Dec  1 12:54:35 2024
+] CREATE FILE a/newfile.txt
+[Sun Dec  1 12:54:35 2024
+] Create Request:FILE Path=a/newfile.txt
+[Sun Dec  1 12:54:35 2024
+] File created
+[Sun Dec  1 12:55:03 2024
+] WRITE a/newfile.txt hello world
+[Sun Dec  1 12:59:43 2024
+] SUCCESS: Discovered 22 paths:
+
+[Sun Dec  1 12:59:43 2024
+] SUCCESS:Registration
+[Sun Dec  1 12:59:43 2024
+] SUCCESS: Storage Server running on port Client_port 33545
+[Sun Dec  1 13:00:01 2024
+] WRITE a/newfile.txt hello world
+[Sun Dec  1 13:00:01 2024
+] Write Request: Path=../storage_server/a/newfile.txt, Size=11 bytes
+[Sun Dec  1 13:00:01 2024
+] WRITE SUCCESS: Path=../storage_server/a/newfile.txt, Size=11 bytes
+[Sun Dec  1 13:02:47 2024
+] INFO Makefile
+[Sun Dec  1 13:03:36 2024
+] STREAM b/coldplay.mp3

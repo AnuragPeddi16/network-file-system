@@ -2,8 +2,8 @@
 
 // Enhanced write request handler with file-level locking
 int handle_client_write_request(const char* upath, const char* data) {
-    char* path=malloc(sizeof(upath)+4);
-    strcpy(path,"./");
+    char* path=malloc(sizeof(upath)+MAX_PATH_LENGTH);
+    strcpy(path,config.base_path);
     strcat(path,upath);
 
     int sync=0;
@@ -94,8 +94,8 @@ int handle_client_write_request(const char* upath, const char* data) {
 
 // Enhanced read request handler with file-level locking
 int handle_client_read_request(const char* upath, int client_socket) {
-    char* path=malloc(sizeof(upath)+4);
-    strcpy(path,"./");
+    char* path=malloc(sizeof(upath)+MAX_PATH_LENGTH);
+    strcpy(path,config.base_path);
     strcat(path,upath);
 
     char buffer[BUFFER_SIZE];
@@ -127,8 +127,8 @@ int handle_client_create_request(const char* type,const char* path) {
     log_message(log_msg);
 
     //Tokenise path
-    char* actual_path=malloc(sizeof(path)+4);
-    strcpy(actual_path,"./");
+    char* actual_path=malloc(sizeof(path)+MAX_PATH_LENGTH);
+    strcpy(actual_path,config.base_path);
     strcat(actual_path,path);
 
     //Add to Concurrent paths
@@ -190,8 +190,8 @@ int handle_client_delete_request(const char* type, const char* path) {
 
     //Tokenise path
     
-    char* actual_path=malloc(sizeof(path)+4);
-    strcpy(actual_path,"./");
+    char* actual_path=malloc(sizeof(path)+MAX_PATH_LENGTH);
+    strcpy(actual_path,config.base_path);
     strcat(actual_path,path);
     
     pthread_mutex_lock(&file_locks_mutex);
@@ -257,8 +257,8 @@ int handle_client_info_request(const char* upath, char* info_buffer) {
     struct stat file_stat;
 
     //Tokenise path
-    char* path=malloc(sizeof(upath)+4);
-    strcpy(path,"./");
+    char* path=malloc(sizeof(upath)+MAX_PATH_LENGTH);
+    strcpy(path,config.base_path);
     strcat(path,upath);
 
     if (stat(path, &file_stat) != 0) {
@@ -275,8 +275,8 @@ int handle_client_info_request(const char* upath, char* info_buffer) {
 // Handle STREAM request
 int handle_client_stream_request(const char* upath, int client_socket) {
     //Tokenise path
-    char* path=malloc(sizeof(upath)+4);
-    strcpy(path,"./");
+    char* path=malloc(sizeof(upath)+MAX_PATH_LENGTH);
+    strcpy(path,config.base_path);
     strcat(path,upath);
 
     FILE* audio_file = fopen(path, "rb");

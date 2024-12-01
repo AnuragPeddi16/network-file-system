@@ -95,7 +95,7 @@ void print_help() {
     printf("    Exit the NFS client\n\n");
 }
 
-void execute_command(int argc, char** args) {
+void execute_command(int argc, char** args, char *ip) {
     if (argc == 0) return;
 
     // Convert command to uppercase for case-insensitive comparison
@@ -198,10 +198,12 @@ void execute_command(int argc, char** args) {
     }
 }
 
-int main() {
+int main(int argc, char** argv) {
     char input[MAX_INPUT_SIZE];
     char input_copy[MAX_INPUT_SIZE];
     char* args[MAX_ARGS];
+
+    char* ip = argv[1];
     
     // Print welcome message and help
     printf("Welcome to NFS Client\n");
@@ -234,7 +236,7 @@ int main() {
         int argc = parse_command(trimmed_input, args);
         
         // Execute the command
-        execute_command(argc, args);
+        execute_command(argc, args, ip);
     }
     
     return 0;
