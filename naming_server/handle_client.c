@@ -579,7 +579,7 @@ int add_backups(StorageServer* ss) {
 
     for (int i = server_count-1; i >= 0; i--) {
 
-        if (storage_servers[i].active) {
+        if (storage_servers[i].active && ss != &storage_servers[i]) {
 
             ss->backups[count] = &storage_servers[i];
             
