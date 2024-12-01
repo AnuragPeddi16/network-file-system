@@ -29,6 +29,7 @@ int listFilesRecursive(const char *basePath, const char *relativePath, char buff
     dir = opendir(fullPath);
     if (!dir) {
         perror("opendir");
+        fprintf(stderr, "directory: %s\n", fullPath);
         return -1; // Return error if directory can't be opened
     }
 

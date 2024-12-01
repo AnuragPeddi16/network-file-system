@@ -499,6 +499,8 @@ void* handle_client_request(void* client_socket_ptr) {
     char* operation = strtok(buffer, " ");
     char* path = strtok(NULL, " ");  // For CREATE/DELETE/COPY It will be FILE/FOLDER
 
+    if (path[0] == '/') path = path+1;
+
     // Handle different operations
     if (operation == NULL) {
         int ack = htonl(FAILED);
@@ -594,6 +596,8 @@ void* handle_client_request(void* client_socket_ptr) {
     else if (strcmp(operation, "CREATE") == 0) {
         printf("%s",path); //Path is type
         char* upath = strtok(NULL," ");
+        if (upath[0] == '/') upath = upath+1;
+        
         if (handle_client_create_request(path,upath) == 0) {
             int ack = htonl(ACK);
             send(client_sock,&ack,sizeof(ack), 0);
@@ -604,6 +608,7 @@ void* handle_client_request(void* client_socket_ptr) {
     }
     else if (strcmp(operation, "DELETE") == 0) {
         char* upath = strtok(NULL, " ");
+        if (upath[0] == '/') upath = upath+1;
         
         FileLock* lock = get_file_lock(upath);
         if(lock==NULL){

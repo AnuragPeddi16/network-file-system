@@ -5,7 +5,7 @@ StorageServerConfig config; // Global configuration variable, Declare in Utils.h
 int sock;
 
 // Global array to track file locks
-FileLock file_locks[MAX_CONCURRENT_FILES];
+FileLock file_locks[MAX_ACCESSIBLE_PATHS];
 pthread_mutex_t file_locks_mutex;
 
 // Register with Naming Server
@@ -25,8 +25,8 @@ void register_with_naming_server() {
     }
 
     // Prepare registration message
-    char message[BUFFER_SIZE+100];
-    char paths_str[BUFFER_SIZE] = "";
+    char message[MAX_ACCESSIBLE_PATHS*MAX_PATH_LENGTH+100];
+    char paths_str[MAX_ACCESSIBLE_PATHS*MAX_PATH_LENGTH] = "";
     pthread_mutex_lock(&config.config_mutex);
     for (int i = 0; i < config.num_paths; i++) {
         strcat(paths_str, config.accessible_paths[i]);

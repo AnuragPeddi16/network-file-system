@@ -20,7 +20,7 @@
 
 // Define constants
 #define BUFFER_SIZE 4096
-#define MAX_ACCESSIBLE_PATHS 100
+#define MAX_ACCESSIBLE_PATHS 1000
 #define MAX_PATH_LENGTH 1024
 #define MAX_CLIENTS 100
 #define NM_PORT 8050
